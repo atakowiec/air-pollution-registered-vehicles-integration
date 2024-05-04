@@ -9,7 +9,7 @@ export default function Logout() {
   const dispatch = useDispatch()
 
   useEffect(() => {
-    getApi().post("/logout")
+    getApi().get("/auth/logout")
       .then(() => dispatch(userActions.setUserData(null)))
       .catch((e) => console.error(e))
       .finally(() => navigate("/"))

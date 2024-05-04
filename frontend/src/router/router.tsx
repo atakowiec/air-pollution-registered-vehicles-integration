@@ -35,8 +35,8 @@ const router = createBrowserRouter([
       {
         path: "pollution/xlsx",
         element: <>import zanieczyszczenia powietrza z xlsx</>
-      }]
-
+      }
+    ]
   }
 ])
 

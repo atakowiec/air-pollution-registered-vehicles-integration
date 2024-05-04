@@ -1,5 +1,7 @@
 package pl.pollub.is.backend.auth;
 
+import io.jsonwebtoken.Claims;
+import jakarta.servlet.http.HttpServletRequest;
 import jakarta.servlet.http.HttpServletResponse;
 import jakarta.validation.Valid;
 import lombok.RequiredArgsConstructor;
@@ -61,8 +63,26 @@ public class AuthController {
     }
 
     @GetMapping("/logout")
-    public String logout(HttpServletResponse res) {
+    public void logout(HttpServletResponse res) {
         jwtService.invalidateToken(res);
-        return "";
+        res.setStatus(204);
+    }
+
+    @PostMapping("/verify")
+    public Map<?, ?> verify(HttpServletRequest req) {
+        Claims claims = jwtService.resolveClaims(req);
+        if (claims == null || !claims.containsKey("id")) {
+            throw new HttpException(401, "Niepoprawne dane logowania");
+        }
+
+        System.out.println("verify");
+
+        User user = authService.getUsersRepository().findById(claims.get("id", Long.class))
+                .orElseThrow(() -> new HttpException(401, "Niepoprawne dane logowania"));
+
+        return SimpleJsonBuilder.of("id", user.getId())
+                .add("username", user.getUsername())
+                .add("role", user.getRole().name())
+                .build();
     }
 }

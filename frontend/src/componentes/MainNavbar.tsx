@@ -5,6 +5,7 @@ import NavDropdown from 'react-bootstrap/NavDropdown';
 import style from "../style/main.module.scss"
 import {useSelector} from "react-redux";
 import {State} from "../store";
+import {NavLink} from "react-router-dom";
 
 export function MainNavbar() {
   const user = useSelector((state: State) => state.user);
@@ -32,12 +33,12 @@ export function MainNavbar() {
             {
               user.isLogged ?
                 <>
-                  <Nav.Link className={style.navbarLogin}>Zalogowano jako <b>{user.username}</b></Nav.Link>
-                  <Nav.Link href="/logout">Wyloguj</Nav.Link>
+                  <span className={`${style.navbarLogin} nav-link`}>Zalogowano jako <b>{user.username}</b></span>
+                  <Nav.Link as={NavLink} to="/logout">Wyloguj</Nav.Link>
                 </> :
                 <>
-                  <Nav.Link href="/login" className={style.navbarLogin}>Logowanie</Nav.Link>
-                  <Nav.Link href="/register">Rejestracja</Nav.Link>
+                  <Nav.Link as={NavLink} to="/login" className={style.navbarLogin}>Logowanie</Nav.Link>
+                  <Nav.Link as={NavLink} to="/register">Rejestracja</Nav.Link>
                 </>
             }
           </Nav>
