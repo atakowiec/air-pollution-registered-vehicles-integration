@@ -24,7 +24,7 @@ public class AuthController {
     @PostMapping("/register")
     public Map<?, ?> register(@Valid @RequestBody RegisterDto registerDto, HttpServletResponse res) {
         if (authService.isUsernameTaken(registerDto.getUsername())) {
-            throw new HttpException(409, "Username is already taken");
+            throw new HttpException(409, "Nazwa użytkownika jest już zajęta");
         }
 
         String hashedPassword = authService.hashPassword(registerDto.getPassword());
@@ -46,10 +46,10 @@ public class AuthController {
 
     @PostMapping("/login")
     public Map<?, ?> login(@Valid @RequestBody LoginDto loginDto, HttpServletResponse res) {
-        User user = authService.getUsersRepository().findByUsername(loginDto.getUsername()).orElseThrow(() -> new HttpException(404, "User not found"));
+        User user = authService.getUsersRepository().findByUsername(loginDto.getUsername()).orElseThrow(() -> new HttpException(401, "Niepoprawne dane logowania"));
 
         if (!authService.verifyPassword(user.getPassword(), loginDto.getPassword())) {
-            throw new HttpException(401, "Invalid password");
+            throw new HttpException(401, "Niepoprawne dane logowania");
         }
 
         jwtService.addTokenToResponse(res, user);
@@ -61,7 +61,8 @@ public class AuthController {
     }
 
     @GetMapping("/logout")
-    public void logout(HttpServletResponse res) {
+    public String logout(HttpServletResponse res) {
         jwtService.invalidateToken(res);
+        return "";
     }
 }

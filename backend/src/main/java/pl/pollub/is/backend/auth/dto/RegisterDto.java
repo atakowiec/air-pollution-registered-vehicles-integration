@@ -14,4 +14,7 @@ public class RegisterDto {
     @NotNull(message = "Hasło jest wymagane")
     @Pattern(regexp = ".{4,}", message = "Hasło musi mieć co najmniej 4 znaki")
     private String password;
+
+    @NotNull(message = "Potwierdzenie hasła jest wymagane")
+    private String passwordConfirmation;
 }
