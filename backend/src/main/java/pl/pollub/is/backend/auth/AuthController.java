@@ -69,16 +69,16 @@ public class AuthController {
     }
 
     @PostMapping("/verify")
-    public Map<?, ?> verify(HttpServletRequest req) {
+    public Map<?, ?> verify(HttpServletRequest req, HttpServletResponse res) {
         Claims claims = jwtService.resolveClaims(req);
         if (claims == null || !claims.containsKey("id")) {
             throw new HttpException(401, "Niepoprawne dane logowania");
         }
 
-        System.out.println("verify");
-
         User user = authService.getUsersRepository().findById(claims.get("id", Long.class))
                 .orElseThrow(() -> new HttpException(401, "Niepoprawne dane logowania"));
+
+        jwtService.addTokenToResponse(res, user);
 
         return SimpleJsonBuilder.of("id", user.getId())
                 .add("username", user.getUsername())

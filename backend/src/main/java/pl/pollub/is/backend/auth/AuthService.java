@@ -2,11 +2,11 @@ package pl.pollub.is.backend.auth;
 
 import lombok.Getter;
 import lombok.RequiredArgsConstructor;
-import org.springframework.security.core.userdetails.UserDetails;
 import org.springframework.security.core.userdetails.UserDetailsService;
 import org.springframework.security.core.userdetails.UsernameNotFoundException;
 import org.springframework.security.crypto.bcrypt.BCryptPasswordEncoder;
 import org.springframework.stereotype.Service;
+import pl.pollub.is.backend.auth.user.User;
 import pl.pollub.is.backend.auth.user.UsersRepository;
 import pl.pollub.is.backend.exception.HttpException;
 
@@ -22,7 +22,7 @@ public class AuthService implements UserDetailsService {
     }
 
     @Override
-    public UserDetails loadUserByUsername(String username) throws UsernameNotFoundException {
+    public User loadUserByUsername(String username) throws UsernameNotFoundException {
         return usersRepository.findByUsername(username).orElseThrow(() -> new HttpException(404, "User not found"));
     }
 

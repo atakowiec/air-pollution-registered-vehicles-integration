@@ -10,11 +10,11 @@ import lombok.RequiredArgsConstructor;
 import org.springframework.lang.NonNull;
 import org.springframework.security.authentication.UsernamePasswordAuthenticationToken;
 import org.springframework.security.core.context.SecurityContextHolder;
-import org.springframework.security.core.userdetails.UserDetails;
 import org.springframework.security.web.authentication.WebAuthenticationDetailsSource;
 import org.springframework.stereotype.Component;
 import org.springframework.web.filter.OncePerRequestFilter;
 import pl.pollub.is.backend.auth.AuthService;
+import pl.pollub.is.backend.auth.user.User;
 
 import java.io.IOException;
 
@@ -43,17 +43,22 @@ public class JwtAuthenticationFilter extends OncePerRequestFilter {
         final String username = tokenClaims.getSubject();
 
         if (username != null && SecurityContextHolder.getContext().getAuthentication() == null) {
-            UserDetails userDetails = this.authService.loadUserByUsername(username);
+            User user = this.authService.loadUserByUsername(username);
 
             UsernamePasswordAuthenticationToken authToken = new UsernamePasswordAuthenticationToken(
-                    userDetails,
+                    user,
                     null,
-                    userDetails.getAuthorities()
+                    user.getAuthorities()
             );
+
             authToken.setDetails(
                     new WebAuthenticationDetailsSource().buildDetails(request)
             );
+
             SecurityContextHolder.getContext().setAuthentication(authToken);
+
+            // generate new token and set it in response
+            jwtService.addTokenToResponse(response, user);
         }
         filterChain.doFilter(request, response);
     }
