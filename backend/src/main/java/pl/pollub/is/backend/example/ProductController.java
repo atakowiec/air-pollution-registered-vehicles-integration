@@ -18,6 +18,11 @@ public class ProductController {
         return productService.getAllProducts();
     }
 
+    @GetMapping("/admin")
+    public String admin() {
+        return "admin";
+    }
+
     @PostMapping
     public Product createProduct(@Valid @RequestBody CreateProductDto createProductDto) {
         return productService.createProduct(createProductDto);
