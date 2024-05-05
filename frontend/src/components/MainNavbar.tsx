@@ -19,14 +19,14 @@ export function MainNavbar() {
           <Nav style={{width: "100%"}}>
             <Nav.Link href="/">Strona główna</Nav.Link>
             <NavDropdown title="Import danych" id="basic-nav-dropdown">
-              <NavDropdown.Item href="/import/cepik/api">
+              <NavDropdown.Item as={NavLink} to="/import/cepik/api">
                 Dane CEPIK z api
               </NavDropdown.Item>
-              <NavDropdown.Item href="/import/cepik/csv">
+              <NavDropdown.Item as={NavLink} to="/import/cepik/csv">
                 Dane CEPIK z pliku CSV
               </NavDropdown.Item>
               <NavDropdown.Divider/>
-              <NavDropdown.Item href="/import/pollution/xlsx">
+              <NavDropdown.Item as={NavLink} to="/import/pollution/xlsx">
                 Zanieczyszczenie powietrza z pliku XLSX
               </NavDropdown.Item>
             </NavDropdown>

@@ -9,7 +9,7 @@ import {Link, useNavigate} from "react-router-dom";
 import {userActions} from "../../store/userSlice.ts";
 
 export default function Login() {
-  title("Logowanie")
+  title("Logowanie");
 
   const usernameRef = useRef<HTMLInputElement>(null);
   const passwordRef = useRef<HTMLInputElement>(null);

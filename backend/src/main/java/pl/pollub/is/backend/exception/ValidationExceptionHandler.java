@@ -1,7 +1,6 @@
 package pl.pollub.is.backend.exception;
 
 import com.fasterxml.jackson.core.JsonProcessingException;
-import com.fasterxml.jackson.databind.ObjectMapper;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.MediaType;
 import org.springframework.http.ResponseEntity;
@@ -42,11 +41,10 @@ public class ValidationExceptionHandler {
         return ResponseEntity
                 .status(HttpStatus.BAD_REQUEST)
                 .contentType(MediaType.APPLICATION_JSON)
-                .body(new ObjectMapper().writeValueAsString(
-                        SimpleJsonBuilder.of("error", HttpStatus.BAD_REQUEST.getReasonPhrase())
+                .body(SimpleJsonBuilder.of("error", HttpStatus.BAD_REQUEST.getReasonPhrase())
                                 .add("message", "Validation failed")
                                 .add("status", HttpStatus.BAD_REQUEST.value())
                                 .add("errors", errors)
-                                .build()));
+                                .toJson());
     }
 }

@@ -12,8 +12,6 @@ import java.lang.annotation.*;
 public @interface PasswordsMatch {
     String message() default "Hasła nie są takie same";
 
-    String field();
-
     Class<?>[] groups() default {};
 
     Class<? extends Payload>[] payload() default {};

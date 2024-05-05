@@ -1,5 +1,8 @@
 package pl.pollub.is.backend.util;
 
+import com.fasterxml.jackson.core.JsonProcessingException;
+import com.fasterxml.jackson.databind.ObjectMapper;
+
 import java.util.HashMap;
 import java.util.Map;
 
@@ -21,5 +24,9 @@ public class SimpleJsonBuilder {
 
     public Map<String, Object> build() {
         return json;
+    }
+
+    public String toJson() throws JsonProcessingException {
+        return new ObjectMapper().writeValueAsString(json);
     }
 }

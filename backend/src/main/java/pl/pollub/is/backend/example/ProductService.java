@@ -1,14 +1,15 @@
 package pl.pollub.is.backend.example;
 
-import org.springframework.beans.factory.annotation.Autowired;
+import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Service;
+import pl.pollub.is.backend.exception.HttpException;
 
 import java.util.List;
 
 @Service
+@RequiredArgsConstructor
 public class ProductService {
-    @Autowired
-    private ProductRepository productRepository;
+    private final ProductRepository productRepository;
 
     public List<Product> getAllProducts() {
         return productRepository.findAll();
@@ -23,10 +24,10 @@ public class ProductService {
     }
 
     public Product getProduct(Long id) {
-        return productRepository.findById(id).orElseThrow(() -> new IllegalArgumentException("Product not found"));
+        return productRepository.findById(id).orElseThrow(() -> new HttpException(404, "Product not found"));
     }
 
     public List<Product> getProductsByName(String name) {
-        return productRepository.findByNameContaining(name).orElseThrow(() -> new IllegalArgumentException("Product not found"));
+        return productRepository.findByNameContaining(name).orElseThrow(() -> new HttpException(404, "Product not found"));
     }
 }

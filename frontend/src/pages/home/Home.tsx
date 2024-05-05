@@ -1,4 +1,4 @@
-import {MainNavbar} from "../../componentes/MainNavbar.tsx";
+import {MainNavbar} from "../../components/MainNavbar.tsx";
 import {title} from "../../util/title.ts";
 
 export default function Home() {

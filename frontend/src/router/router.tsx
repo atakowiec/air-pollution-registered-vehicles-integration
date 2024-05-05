@@ -3,6 +3,8 @@ import Home from "../pages/home/Home.tsx";
 import Login from "../pages/login/Login.tsx";
 import Logout from "../pages/login/Logout.tsx";
 import Register from "../pages/login/Register.tsx";
+import CepikApiImport from "../pages/import/cepik/CepikApiImport.tsx";
+import CepikFileImport from "../pages/import/cepik/CepikFileImport.tsx";
 
 const router = createBrowserRouter([
   {
@@ -26,11 +28,11 @@ const router = createBrowserRouter([
     children: [
       {
         path: "cepik/api",
-        element: <>import z api cepik</>
+        element: <CepikApiImport />
       },
       {
         path: "cepik/csv",
-        element: <>import z csv cepik</>
+        element: <CepikFileImport />
       },
       {
         path: "pollution/xlsx",

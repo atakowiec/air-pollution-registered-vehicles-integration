@@ -5,6 +5,7 @@ import jakarta.servlet.http.HttpServletRequest;
 import jakarta.servlet.http.HttpServletResponse;
 import jakarta.validation.Valid;
 import lombok.RequiredArgsConstructor;
+import org.springframework.http.HttpStatus;
 import org.springframework.web.bind.annotation.*;
 import pl.pollub.is.backend.auth.dto.LoginDto;
 import pl.pollub.is.backend.auth.dto.RegisterDto;
@@ -26,7 +27,7 @@ public class AuthController {
     @PostMapping("/register")
     public Map<?, ?> register(@Valid @RequestBody RegisterDto registerDto, HttpServletResponse res) {
         if (authService.isUsernameTaken(registerDto.getUsername())) {
-            throw new HttpException(409, "Nazwa użytkownika jest już zajęta");
+            throw new HttpException(HttpStatus.CONFLICT, "Nazwa użytkownika jest już zajęta");
         }
 
         String hashedPassword = authService.hashPassword(registerDto.getPassword());
@@ -48,10 +49,11 @@ public class AuthController {
 
     @PostMapping("/login")
     public Map<?, ?> login(@Valid @RequestBody LoginDto loginDto, HttpServletResponse res) {
-        User user = authService.getUsersRepository().findByUsername(loginDto.getUsername()).orElseThrow(() -> new HttpException(401, "Niepoprawne dane logowania"));
+        User user = authService.getUsersRepository().findByUsername(loginDto.getUsername())
+                .orElseThrow(() -> new HttpException(HttpStatus.UNAUTHORIZED, "Niepoprawne dane logowania"));
 
         if (!authService.verifyPassword(user.getPassword(), loginDto.getPassword())) {
-            throw new HttpException(401, "Niepoprawne dane logowania");
+            throw new HttpException(HttpStatus.UNAUTHORIZED, "Niepoprawne dane logowania");
         }
 
         jwtService.addTokenToResponse(res, user);
