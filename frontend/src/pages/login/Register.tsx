@@ -7,6 +7,7 @@ import {useDispatch, useSelector} from "react-redux";
 import {State} from "../../store";
 import {Link, useNavigate} from "react-router-dom";
 import {userActions} from "../../store/userSlice.ts";
+import {AxiosResponse} from "axios";
 
 interface ErrorState {
   username?: string,
@@ -60,7 +61,7 @@ export default function Register() {
     }
 
     getApi().post("/auth/register", {username, password, passwordConfirmation})
-      .then((response) => {
+      .then((response: AxiosResponse) => {
         if (response.status < 300) {
           setError({})
           dispatch(userActions.setUserData(response.data))
@@ -77,7 +78,7 @@ export default function Register() {
           setError({message: response.data.message ?? "Wystąpił błąd serwera"})
         }
       })
-      .catch((e) => {
+      .catch((e: any) => {
         setError({message: "Wystąpił błąd serwera"})
         console.error(e)
       })
