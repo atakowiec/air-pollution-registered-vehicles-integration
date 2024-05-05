@@ -10,7 +10,7 @@ services:
       MYSQL_USER: IS_user
       MYSQL_PASSWORD: pass
     ports:
-      - "3306:3306"
+      - "3369:3306"
     volumes:
       - database:/var/lib/mysql
   phpmyadmin:
