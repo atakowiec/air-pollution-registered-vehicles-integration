@@ -43,8 +43,8 @@ export default function Register() {
       errors.message = "Wszystkie pola są wymagane"
     }
 
-    if (password !== passwordConfirmation) {
-      errors.passwordConfirmation = "Hasła nie są takie same"
+    if (password && password !== passwordConfirmation) {
+      errors.message = "Hasła nie są takie same"
     }
 
     if (password && password.length < 4) {
@@ -55,8 +55,8 @@ export default function Register() {
       errors.username = "Nazwa użytkownika musi mieć co najmniej 4 znaki"
     }
 
+    setError(errors)
     if (Object.keys(errors).length) {
-      setError(errors)
       return
     }
 

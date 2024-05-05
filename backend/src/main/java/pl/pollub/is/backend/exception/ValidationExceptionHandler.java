@@ -7,6 +7,7 @@ import org.springframework.http.MediaType;
 import org.springframework.http.ResponseEntity;
 import org.springframework.validation.BindingResult;
 import org.springframework.validation.FieldError;
+import org.springframework.validation.ObjectError;
 import org.springframework.web.bind.MethodArgumentNotValidException;
 import org.springframework.web.bind.annotation.ExceptionHandler;
 import org.springframework.web.bind.annotation.RestControllerAdvice;
@@ -31,6 +32,11 @@ public class ValidationExceptionHandler {
             String message = fieldError.getDefaultMessage();
 
             errors.computeIfAbsent(field, _ -> new ArrayList<>()).add(message);
+        }
+
+        for (ObjectError objectError : bindingResult.getGlobalErrors()) {
+            String message = objectError.getDefaultMessage();
+            errors.computeIfAbsent("message", _ -> new ArrayList<>()).add(message);
         }
 
         return ResponseEntity
