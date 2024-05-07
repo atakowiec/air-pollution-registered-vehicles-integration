@@ -5,6 +5,7 @@ import Logout from "../pages/login/Logout.tsx";
 import Register from "../pages/login/Register.tsx";
 import CepikApiImport from "../pages/import/cepik/CepikApiImport.tsx";
 import CepikFileImport from "../pages/import/cepik/CepikFileImport.tsx";
+import PollutionFileImport from "../pages/import/pollution/PollutionFileImport.tsx";
 
 const router = createBrowserRouter([
   {
@@ -36,7 +37,7 @@ const router = createBrowserRouter([
       },
       {
         path: "pollution/xlsx",
-        element: <>import zanieczyszczenia powietrza z xlsx</>
+        element: <PollutionFileImport />
       }
     ]
   }
