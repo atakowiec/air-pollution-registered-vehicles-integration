@@ -13,6 +13,8 @@ import java.util.ArrayList;
 import java.util.Date;
 import java.util.List;
 
+import static com.microsoft.sqlserver.jdbc.StringUtils.isNumeric;
+
 @Service
 @RequiredArgsConstructor
 public class VehiclesService {
@@ -24,80 +26,109 @@ public class VehiclesService {
         String line;
         List<Vehicles> vehiclesList = new ArrayList<>();
 
+
         // Read the first line to get column names
         String[] columnNames = br.readLine().split(",");
 
+        int productionYearIndex = -1;
+        int productionMethodIndex = -1;
+
+        // Identify the indices of "rok_produkcji" and "sposob_produkcji" columns
+        for (int i = 0; i < columnNames.length; i++) {
+            if (columnNames[i].equals("rok_produkcji")) {
+                productionYearIndex = i;
+            } else if (columnNames[i].equals("sposob_produkcji")) {
+                productionMethodIndex = i;
+            }
+        }
+
         while ((line = br.readLine()) != null) {
             String[] data = line.split(",(?=(?:[^\"]*\"[^\"]*\")*[^\"]*$)");
+
+            // Swap values if "rok_produkcji" and "sposob_produkcji" are identified incorrectly
+            if (productionYearIndex != -1 && productionMethodIndex != -1 &&
+                    data.length > productionYearIndex && data.length > productionMethodIndex) {
+                // Check if the values are numeric, if not, swap them
+                if (!isNumeric(data[productionYearIndex]) && isNumeric(data[productionMethodIndex])) {
+                    String temp = data[productionYearIndex];
+                    data[productionYearIndex] = data[productionMethodIndex];
+                    data[productionMethodIndex] = temp;
+                }
+            }
 
             Vehicles vehicle = new Vehicles();
 
             // Map data from CSV to Vehicles entity based on column names
             for (int i = 0; i < columnNames.length; i++) {
+
+                String value = data.length > i ? data[i] : "";
                 switch (columnNames[i]) {
+                    case "pojazd_id":
+                        vehicle.setId(getValueOrNull(value));
+                        break;
                     case"akt_miejsce_rej_wojwe":
-                        vehicle.setAreaCode(getValueOrNull(data[i]));
+                        vehicle.setAreaCode(getValueOrNull(value));
                         break;
                     case "akt_miejsce_rej_powiat":
-                        vehicle.setCountyCode(getValueOrNull(data[i]));
+                        vehicle.setCountyCode(getValueOrNull(value));
                         break;
                     case "marka":
-                        vehicle.setBrand(getValueOrNull(data[i]));
+                        vehicle.setBrand(getValueOrNull(value));
                         break;
                     case "model":
-                        vehicle.setModel(getValueOrNull(data[i]));
+                        vehicle.setModel(getValueOrNull(value));
                         break;
                     case "rodzaj":
-                        vehicle.setType(getValueOrNull(data[i]));
+                        vehicle.setType(getValueOrNull(value));
                         break;
                     case "podrodzaj":
-                        vehicle.setSubType(getValueOrNull(data[i]));
+                        vehicle.setSubType(getValueOrNull(value));
                         break;
                     case "rok_produkcji":
-                        vehicle.setManufactureYear(getIntegerValueOrNull(data[i]));
+                        vehicle.setManufactureYear(getIntegerValueOrNull(value));
                         break;
                     case "sposob_produkcji":
-                        vehicle.setManufactureMethod(getValueOrNull(data[i]));
+                        vehicle.setManufactureMethod(getValueOrNull(value));
                         break;
                     case "data_pierwszej_rej":
-                        vehicle.setFirstRegistrationDate(getDateOrNull(data[i], new SimpleDateFormat("yyyy-MM-dd")));
+                        vehicle.setFirstRegistrationDate(getDateOrNull(value, new SimpleDateFormat("yyyy-MM-dd")));
                         break;
                     case "pojemnosc_silnika":
-                        vehicle.setEngineCapacity(getDoubleValueOrNull(data[i]));
+                        vehicle.setEngineCapacity(getDoubleValueOrNull(value));
                         break;
                     case "moc_silnika":
-                        vehicle.setEnginePower(getDoubleValueOrNull(data[i]));
+                        vehicle.setEnginePower(getDoubleValueOrNull(value));
                         break;
                     case "moc_silnika_hybrydowego":
-                        vehicle.setHybridEnginePower(getDoubleValueOrNull(data[i]));
+                        vehicle.setHybridEnginePower(getDoubleValueOrNull(value));
                         break;
                     case "masa_wlasna":
-                        vehicle.setCurbWeight(getDoubleValueOrNull(data[i]));
+                        vehicle.setCurbWeight(getDoubleValueOrNull(value));
                         break;
                     case "rodzaj_paliwa":
-                        vehicle.setFuelType(getValueOrNull(data[i]));
+                        vehicle.setFuelType(getValueOrNull(value));
                         break;
                     case "rodzaj_paliwa_alternatywnego":
-                        vehicle.setAlternativeFuelType(getValueOrNull(data[i]));
+                        vehicle.setAlternativeFuelType(getValueOrNull(value));
                         break;
                     case "rodzaj_paliwa_alternatywnego2":
-                        vehicle.setAlternativeFuelType2(getValueOrNull(data[i]));
+                        vehicle.setAlternativeFuelType2(getValueOrNull(value));
                         break;
                     case "sr_zuzycie_pal":
-                        vehicle.setAverageFuelConsumption(getDoubleValueOrNull(data[i]));
+                        vehicle.setAverageFuelConsumption(getDoubleValueOrNull(value));
                         break;
                     case "data_wyrejestrowania":
-                        vehicle.setDeregistrationDate(getDateOrNull(data[i], new SimpleDateFormat("yyyy-MM-dd")));
+                        vehicle.setDeregistrationDate(getDateOrNull(value, new SimpleDateFormat("yyyy-MM-dd")));
                         break;
                     case "siedziba_wlasciciela_woj":
-                        vehicle.setVehiclesOwnerArea(getValueOrNull(data[i]));
+                        vehicle.setVehiclesOwnerArea(getValueOrNull(value));
                         break;
-//                    case "emisja_co2":
-//                        vehicle.setFuelCo2Emission(getDoubleValueOrNull(data[i]));
-//                        break;
-//                    case "emisja_co2_pal_alternatywne1":
-//                        vehicle.setAlternativeFuelCo2Emission(getDoubleValueOrNull(data[i]));
-//                        break;
+                    case "emisja_co2":
+                        vehicle.setFuelCo2Emission(getDoubleValueOrNull(value));
+                        break;
+                    case "emisja_co2_pal_alternatywne1":
+                        vehicle.setAlternativeFuelCo2Emission(getDoubleValueOrNull(value));
+                        break;
                 }
             }
 
@@ -125,4 +156,5 @@ public class VehiclesService {
     private Date getDateOrNull(String value, SimpleDateFormat dateFormat) throws ParseException {
         return value.isEmpty() ? null : dateFormat.parse(value);
     }
+
 }

@@ -13,7 +13,7 @@ public class Vehicles {
     @Id
     @Column(name="id")
     @GeneratedValue(strategy = GenerationType.IDENTITY)
-    private Integer id;
+    private String id;
 
     @Column(name = "area_code")
     private String areaCode;
