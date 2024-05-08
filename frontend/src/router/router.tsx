@@ -32,7 +32,7 @@ const router = createBrowserRouter([
         element: <CepikApiImport />
       },
       {
-        path: "cepik/csv",
+        path: "vehicles/csv",
         element: <CepikFileImport />
       },
       {
