@@ -27,7 +27,7 @@ public class SecurityConfig {
                     // todo is there a better way to handle this???
                     auth.requestMatchers("/auth/**").permitAll();
                     auth.requestMatchers("/api/products/admin").hasAuthority("ADMIN");
-                    auth.anyRequest().authenticated();
+                    auth.anyRequest().permitAll();
                 })
                 .sessionManagement((configurer -> configurer.sessionCreationPolicy(SessionCreationPolicy.STATELESS)))
                 .authenticationProvider(authenticationProvider)

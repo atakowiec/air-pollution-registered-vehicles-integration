@@ -6,6 +6,7 @@ import org.springframework.stereotype.Service;
 import org.springframework.web.multipart.MultipartFile;
 
 import java.io.IOException;
+import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
@@ -14,7 +15,7 @@ import java.util.stream.Stream;
 @Service
 @RequiredArgsConstructor
 public class AirPollutionService {
-    private final static List<String> ALLOWED_INDICATORS = List.of(/*"SO2", "NO2", "NOx", */"CO"/*, "O3"*/);
+    private final static List<String> ALLOWED_INDICATORS = List.of("SO2", "NO2", "NOx", "CO", "O3");
     private final static List<String> COLUMN_NAMES = List.of("Rok", "Województwo", "Kod strefy", "Kod stacji", "Wskaźnik", "Czas uśredniania", "Średnia", "Liczba pomiarów");
 
     private final AirPollutionRepository airPollutionRepository;
@@ -36,6 +37,7 @@ public class AirPollutionService {
         airPollutionRepository.deleteAllInBatchByIndicator(sheet.getName());
         try (Stream<Row> rowStream = sheet.openStream()) {
             Map<String, Integer> columnIndexes = new HashMap<>();
+            List<AirPollution> toSave = new ArrayList<>();
 
             rowStream.forEach(row -> {
                 // find column indexes for each column name
@@ -65,12 +67,13 @@ public class AirPollutionService {
                 airPollution.setSamples(getCellValue(row, columnIndexes.get("Liczba pomiarów"), Integer.class));
 
                 // save airPollution to database
-                airPollutionRepository.save(airPollution);
+                toSave.add(airPollution);
 
                 // save indicator to savedIndicators map
                 savedIndicators.merge(airPollution.getIndicator(), 1, Integer::sum);
             });
 
+            airPollutionRepository.saveAll(toSave);
         } catch (IOException e) {
             throw new RuntimeException(e);
         }
