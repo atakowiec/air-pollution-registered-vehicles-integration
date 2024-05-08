@@ -13,7 +13,7 @@ public class Vehicles {
     @Id
     @Column(name="id")
     @GeneratedValue(strategy = GenerationType.IDENTITY)
-    private int id;
+    private Integer id;
 
     @Column(name = "area_code")
     private String areaCode;
@@ -34,7 +34,7 @@ public class Vehicles {
     private String subType;
 
     @Column(name="manufacture_year")
-    private int manufactureYear;
+    private Integer manufactureYear;
 
     @Column(name="manufacture_method")
     private String manufactureMethod;

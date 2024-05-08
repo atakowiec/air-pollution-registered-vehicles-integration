@@ -20,7 +20,7 @@ public class VehiclesController {
 
     private final VehiclesService vehiclesService;
 
-    @PostMapping("/import")
+    @PostMapping("/import/csv")
     public ResponseEntity<Map<String, Integer>> handleFileUpload(@RequestParam("file") MultipartFile file) {
         try {
             vehiclesService.processCsvFile(file);
