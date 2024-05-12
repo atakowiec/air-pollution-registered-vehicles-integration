@@ -64,9 +64,9 @@ public class VehiclesService {
                 String value = data.length > i ? data[i] : "";
                 switch (columnNames[i]) {
                     case "pojazd_id":
-                        vehicle.setId(getValueOrNull(value));
+                        vehicle.setVehicleId(getValueOrNull(value));
                         break;
-                    case"akt_miejsce_rej_wojwe":
+                    case "akt_miejsce_rej_wojwe":
                         vehicle.setAreaCode(getValueOrNull(value));
                         break;
                     case "akt_miejsce_rej_powiat":

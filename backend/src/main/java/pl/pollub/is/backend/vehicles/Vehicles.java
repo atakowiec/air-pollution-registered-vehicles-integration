@@ -11,8 +11,12 @@ import java.util.Date;
 public class Vehicles {
 
     @Id
+    @GeneratedValue(strategy = GenerationType.IDENTITY)
     @Column(name="id")
-    private String id;
+    private Long id;
+
+    @Column(name="vehicle_id")
+    private String vehicleId;
 
     @Column(name = "area_code")
     private String areaCode;
@@ -62,7 +66,7 @@ public class Vehicles {
     @Column(name="alternative_fuel_type2")
     private String alternativeFuelType2;
 
-    @Column(name="average_fuel_consumption")
+    @Column(name="average_fuel_consumption", precision = 2)
     private Double averageFuelConsumption;
 
     @Column(name="deregistration_date")
