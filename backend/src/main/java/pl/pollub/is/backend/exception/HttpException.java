@@ -1,7 +1,6 @@
 package pl.pollub.is.backend.exception;
 
 import com.fasterxml.jackson.core.JsonProcessingException;
-import com.fasterxml.jackson.databind.ObjectMapper;
 import lombok.Getter;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.MediaType;
@@ -25,10 +24,9 @@ public class HttpException extends RuntimeException {
         return ResponseEntity
                 .status(httpStatus)
                 .contentType(MediaType.APPLICATION_JSON)
-                .body(new ObjectMapper().writeValueAsString(
-                        SimpleJsonBuilder.of("error", httpStatus.getReasonPhrase())
-                                .add("message", getMessage())
-                                .add("status", httpStatus.value())
-                                .build()));
+                .body(SimpleJsonBuilder.of("error", httpStatus.getReasonPhrase())
+                        .add("message", getMessage())
+                        .add("status", httpStatus.value())
+                        .toJson());
     }
 }

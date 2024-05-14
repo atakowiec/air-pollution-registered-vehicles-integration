@@ -11,7 +11,6 @@ import org.springframework.web.multipart.MultipartFile;
 
 import java.io.IOException;
 import java.text.ParseException;
-import java.util.Map;
 
 @RestController
 @RequestMapping("/vehicles")
@@ -21,14 +20,12 @@ public class VehiclesController {
     private final VehiclesService vehiclesService;
 
     @PostMapping("/import/csv")
-    public ResponseEntity<Map<String, Integer>> handleFileUpload(@RequestParam("file") MultipartFile file) {
+    public ResponseEntity<String> handleFileUpload(@RequestParam("file") MultipartFile file) {
         try {
-            vehiclesService.processCsvFile(file);
-            return new ResponseEntity<>(HttpStatus.OK);
+            return vehiclesService.processCsvFile(file);
         } catch (IOException | ParseException e) {
             e.printStackTrace(); // Handle the exception appropriately
             return new ResponseEntity<>(HttpStatus.INTERNAL_SERVER_ERROR);
         }
     }
-
 }
