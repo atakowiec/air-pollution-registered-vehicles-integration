@@ -3,20 +3,20 @@ package pl.pollub.is.backend.vehicles;
 import jakarta.persistence.*;
 import lombok.Data;
 
+import java.math.BigInteger;
 import java.util.Date;
 
 @Entity
 @Table(name= "vehicles")
 @Data
-public class Vehicles {
-
+public class Vehicle {
     @Id
+    @Column(name="id", insertable = false)
     @GeneratedValue(strategy = GenerationType.IDENTITY)
-    @Column(name="id")
     private Long id;
 
-    @Column(name="vehicle_id")
-    private String vehicleId;
+    @Column(name="vehicle_id", unique = true, nullable = false)
+    private BigInteger vehicleId;
 
     @Column(name = "area_code")
     private String areaCode;
@@ -80,5 +80,4 @@ public class Vehicles {
 
     @Column(name="alternative_fuel_co2_emission")
     private Double alternativeFuelCo2Emission;
-
 }

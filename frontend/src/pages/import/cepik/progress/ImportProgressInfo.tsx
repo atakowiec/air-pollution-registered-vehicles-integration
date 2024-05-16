@@ -128,7 +128,7 @@ export default function ImportProgressInfo({progress}: ImportProgressInfoProps) 
             ({calculatedData.saveApproxTime ?? "---"})<br/>
             Prędkość zapisu: {calculatedData.savedPerSecond} rekordów/s
           </p>
-          {/* todo add errors here when better saving will be implemented */}
+          <ImportErrors errors={progress.data?.saveErrorsList} errorsCount={progress.data?.saveErrors}/>
         </Container>
       </Container>
     </>

@@ -1,6 +1,7 @@
 import {useState} from "react";
 import {Accordion, Collapse, Table} from "react-bootstrap";
 import Nav from "react-bootstrap/Nav";
+import style from "../../../../style/main.module.scss";
 
 interface ImportErrorsProps {
   errors?: any[]
@@ -32,7 +33,7 @@ function ImportError({error, index}: { error: any, index: number }) {
 
   return (
     <Accordion.Item eventKey={error.vehicleId ?? index} key={error.vehicleId ?? index}>
-      <Accordion.Header>{error.vehicleId}: {error.errorMessage}</Accordion.Header>
+      <Accordion.Header className={style.cutText}>{error.vehicleId}: {error.errorMessage}</Accordion.Header>
       <Accordion.Body>
         <Nav justify variant="tabs" defaultActiveKey="TABLE" className={"mt-3"}
              onSelect={(key) => setDetailsMode(key as any)}>

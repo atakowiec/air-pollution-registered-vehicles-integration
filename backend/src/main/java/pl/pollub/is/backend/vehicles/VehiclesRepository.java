@@ -5,7 +5,7 @@ import org.springframework.data.jpa.repository.Modifying;
 import org.springframework.data.jpa.repository.Query;
 import org.springframework.transaction.annotation.Transactional;
 
-public interface VehiclesRepository extends JpaRepository<Vehicles, Integer> {
+public interface VehiclesRepository extends JpaRepository<Vehicle, Integer> {
     @Modifying
     @Transactional
     @Query(value = "DELETE FROM vehicles WHERE indicator = ?1", nativeQuery = true)

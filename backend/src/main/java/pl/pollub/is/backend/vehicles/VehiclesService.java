@@ -1,5 +1,7 @@
 package pl.pollub.is.backend.vehicles;
 
+import jakarta.persistence.EntityManager;
+import jakarta.persistence.EntityManagerFactory;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.scheduling.concurrent.ThreadPoolTaskExecutor;
@@ -14,28 +16,35 @@ import java.io.BufferedReader;
 import java.io.File;
 import java.io.FileReader;
 import java.io.IOException;
+import java.math.BigInteger;
 import java.text.ParseException;
 import java.text.SimpleDateFormat;
-import java.util.*;
+import java.util.ArrayList;
+import java.util.Date;
+import java.util.LinkedList;
+import java.util.List;
 
 import static com.microsoft.sqlserver.jdbc.StringUtils.isNumeric;
 
 @Service
 public class VehiclesService {
+    private final static int THREAD_POOL_SIZE = 6;
+    private final static int ROWS_PER_THREAD = 5000;
+
     private final ThreadPoolTaskExecutor saveExecutor = saveAsyncExecutor();
-    private final VehiclesRepository vehiclesRepository;
     private final ThreadPoolTaskExecutor asyncExecutor;
     private final VehiclesImportProgress progress;
+    private final EntityManagerFactory entityManagerFactory;
 
-    public VehiclesService(VehiclesRepository vehiclesRepository, ProgressService progressService, ThreadPoolTaskExecutor asyncExecutor) {
-        this.vehiclesRepository = vehiclesRepository;
+    public VehiclesService(ProgressService progressService, ThreadPoolTaskExecutor asyncExecutor, EntityManagerFactory entityManagerFactory) {
         this.asyncExecutor = asyncExecutor;
         this.progress = progressService.registerProgress(new VehiclesImportProgress());
+        this.entityManagerFactory = entityManagerFactory;
     }
 
     public ResponseEntity<String> processCsvFile(MultipartFile multipartFile) throws IOException, ParseException {
         // do not allow to start the import when another import is in progress
-        if (progress.getStatus() != ProgressStatus.NOT_STARTED && progress.getStatus() != ProgressStatus.FINISHED)
+        if (progress.getStatus() == ProgressStatus.IN_PROGRESS)
             throw new HttpException(HttpStatus.CONFLICT, "Operation already in progress");
 
         // clone multipartFile because spring deletes uploaded files as soon as the request is handled
@@ -82,28 +91,26 @@ public class VehiclesService {
             }
         }
 
+
         progress.setTotal(count);
         progress.setDataLoaded(true);
 
-        List<Vehicles> vehiclesList = new LinkedList<>();
+        List<VehicleWrapper> vehiclesList = new LinkedList<>();
         String line;
         while ((line = br.readLine()) != null) {
             List<String> data = splitLine(line);
+            VehicleWrapper vehicleWrapper = new VehicleWrapper(line, columnNames, data);
 
             try {
-                processRow(data, columnNames, vehiclesList, productionMethodIndex, productionYearIndex);
+                processRow(vehicleWrapper, productionMethodIndex, productionYearIndex);
 
+                vehiclesList.add(vehicleWrapper);
                 read++;
                 progress.setRead(read);
 
                 vehiclesList = handleSave(vehiclesList);
             } catch (Exception e) {
-                Map<String, String> columnData = new HashMap<>();
-                for (int i = 0; i < columnNames.length; i++) {
-                    columnData.put(columnNames[i], data.size() > i ? data.get(i) : "");
-                }
-
-                progress.addReadError(data.getFirst(), e.getLocalizedMessage(), columnData, line);
+                progress.addReadError(vehicleWrapper, e);
                 e.printStackTrace();
             }
         }
@@ -115,16 +122,19 @@ public class VehiclesService {
         saveVehiclesAsync(vehiclesList);
     }
 
-    private List<Vehicles> handleSave(List<Vehicles> vehiclesList) {
-        if (vehiclesList.size() < 5000)
-            return vehiclesList;
+    private List<VehicleWrapper> handleSave(List<VehicleWrapper> vehicleList) {
+        if (vehicleList.size() < ROWS_PER_THREAD)
+            return vehicleList;
 
-        saveVehiclesAsync(vehiclesList);
+        saveVehiclesAsync(vehicleList);
 
         return new LinkedList<>();
     }
 
-    private void processRow(List<String> data, String[] columnNames, List<Vehicles> vehiclesList, int productionMethodIndex, int productionYearIndex) throws ParseException {
+    private void processRow(VehicleWrapper vehicleWrapper, int productionMethodIndex, int productionYearIndex) throws ParseException {
+        List<String> data = vehicleWrapper.getValues();
+        String[] columnNames = vehicleWrapper.getColumnNames();
+
         // Swap values if "rok_produkcji" and "sposob_produkcji" are identified incorrectly
         if (productionYearIndex != -1 &&
                 productionMethodIndex != -1 &&
@@ -139,7 +149,7 @@ public class VehiclesService {
             }
         }
 
-        Vehicles vehicle = new Vehicles();
+        Vehicle vehicle = vehicleWrapper.getVehicle();
 
         // Map data from CSV to Vehicles entity based on column names
         for (int i = 0; i < columnNames.length; i++) {
@@ -147,7 +157,7 @@ public class VehiclesService {
 
             switch (columnNames[i]) {
                 case "pojazd_id":
-                    vehicle.setVehicleId(getValueOrNull(value));
+                    vehicle.setVehicleId(value == null ? null : new BigInteger(value));
                     break;
                 case "akt_miejsce_rej_wojwe":
                     vehicle.setAreaCode(getValueOrNull(value));
@@ -215,22 +225,42 @@ public class VehiclesService {
             }
         }
 
-        vehiclesList.add(vehicle);
+        if (vehicle.getVehicleId() == null) {
+            throw new IllegalArgumentException("Vehicle ID is required");
+        }
     }
 
-    private void saveVehiclesAsync(List<Vehicles> toSave) {
+    protected void saveVehiclesAsync(List<VehicleWrapper> toSave) {
         saveExecutor.execute(() -> {
-            try {
-                // todo change save to be able to track errors (which vehicles were not saved and why)
-                vehiclesRepository.saveAll(toSave);
-            } catch (Exception e) {
-                progress.addSaveError(e.getMessage());
-                e.printStackTrace();
-            }
-            progress.addSaved(toSave.size());
+            EntityManager entityManager = entityManagerFactory.createEntityManager();
+            entityManager.getTransaction().begin();
 
-            if (progress.getSaved() + progress.getReadErrors() >= progress.getTotal()) {
-                progress.setStatus(ProgressStatus.FINISHED);
+            int saved = 0;
+            for (VehicleWrapper vehicleWrapper : toSave) {
+                try {
+                    if(vehicleWrapper.getVehicle() == null) {
+                        System.out.println("Vehicle is null");
+                        continue;
+                    }
+                    entityManager.persist(vehicleWrapper.getVehicle());
+                    saved++;
+                } catch (Exception e) {
+                    System.out.println(e.getMessage());
+                    progress.addSaveError(vehicleWrapper, e);
+                }
+            }
+            entityManager.getTransaction().commit();
+            entityManager.clear();
+            entityManager.close();
+            progress.addSaved(saved);
+
+            if (progress.getSaved() + progress.getReadErrors() + progress.getSaveErrors() >= progress.getTotal()) {
+                try {
+                    progress.setStatus(ProgressStatus.FINISHED);
+                } catch (Exception e) {
+                    e.printStackTrace();
+                    progress.setStatus(ProgressStatus.FAILED);
+                }
                 progress.setEndDate();
             }
         });
@@ -238,8 +268,8 @@ public class VehiclesService {
 
     public ThreadPoolTaskExecutor saveAsyncExecutor() {
         ThreadPoolTaskExecutor executor = new ThreadPoolTaskExecutor();
-        executor.setCorePoolSize(6);
-        executor.setMaxPoolSize(6);
+        executor.setCorePoolSize(THREAD_POOL_SIZE);
+        executor.setMaxPoolSize(THREAD_POOL_SIZE);
         executor.setThreadNamePrefix("SaveThread-");
         executor.initialize();
         return executor;

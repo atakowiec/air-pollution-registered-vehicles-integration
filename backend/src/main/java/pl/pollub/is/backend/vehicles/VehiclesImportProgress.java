@@ -3,7 +3,9 @@ package pl.pollub.is.backend.vehicles;
 import lombok.Getter;
 import pl.pollub.is.backend.progress.model.Progress;
 
-import java.util.LinkedList;
+import java.math.BigInteger;
+import java.util.ArrayList;
+import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 
@@ -16,7 +18,7 @@ public class VehiclesImportProgress extends Progress {
     public List<Map<String, Object>> readErrorsList;
 
     public long saveErrors = 0;
-    public List<String> saveErrorsList;
+    public List<Map<String, Object>> saveErrorsList;
 
     public VehiclesImportProgress() {
         super(PROGRESS_KEY);
@@ -26,12 +28,12 @@ public class VehiclesImportProgress extends Progress {
     public void clear() {
         super.clear();
 
-        this.readErrorsList = new LinkedList<>();
+        this.readErrorsList = new ArrayList<>();
         this.readErrors = 0;
         setProgressData("readErrors", 0);
         setProgressData("readErrorsList", this.readErrorsList);
 
-        this.saveErrorsList = new LinkedList<>();
+        this.saveErrorsList = new ArrayList<>();
         this.saveErrors = 0;
         setProgressData("saveErrors", 0);
         setProgressData("saveErrorsList", this.saveErrorsList);
@@ -89,7 +91,7 @@ public class VehiclesImportProgress extends Progress {
         return (long) getProgressData().getOrDefault("total", 0);
     }
 
-    public void addReadError(String vehicleId, String errorMessage, Map<String, String> columnData, String line) {
+    public void addReadError(BigInteger vehicleId, String errorMessage, Map<String, String> columnData, String line) {
         readErrors++;
         setProgressData("readErrors", readErrors);
 
@@ -100,13 +102,38 @@ public class VehiclesImportProgress extends Progress {
         readErrorsList.add(error);
     }
 
-    public void addSaveError(String errorMessage) {
+    public void addReadError(VehicleWrapper wrapper, Exception e) {
+        List<String> data = wrapper.getValues();
+        String[] columnNames = wrapper.getColumnNames();
+
+        Map<String, String> columnData = new HashMap<>();
+        for (int i = 0; i < columnNames.length; i++) {
+            columnData.put(columnNames[i], data.size() > i ? data.get(i) : "");
+        }
+
+        addReadError(wrapper.getVehicle().getVehicleId(), e.getMessage(), columnData, wrapper.getLine());
+    }
+
+    public void addSaveError(VehicleWrapper wrapper, Exception e) {
+        List<String> data = wrapper.getValues();
+        String[] columnNames = wrapper.getColumnNames();
+
+        Map<String, String> columnData = new HashMap<>();
+        for (int i = 0; i < columnNames.length; i++) {
+            columnData.put(columnNames[i], data.size() > i ? data.get(i) : "");
+        }
+
+        addSaveError(wrapper.getVehicle().getVehicleId(), e.getMessage(), columnData, wrapper.getLine());
+    }
+
+    public void addSaveError(BigInteger vehicleId, String errorMessage, Map<String, String> columnData, String line) {
         saveErrors++;
         setProgressData("saveErrors", saveErrors);
 
         if (saveErrors > 100)
             return;
 
-        saveErrorsList.add(errorMessage);
+        Map<String, Object> error = Map.of("vehicleId", vehicleId, "errorMessage", errorMessage, "columnData", columnData, "line", line);
+        saveErrorsList.add(error);
     }
 }
