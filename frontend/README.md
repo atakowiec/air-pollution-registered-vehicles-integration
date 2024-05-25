@@ -1,30 +1,29 @@
-# React + TypeScript + Vite
+# Frontend
 
-This template provides a minimal setup to get React working in Vite with HMR and some ESLint rules.
+## Na górze
 
-Currently, two official plugins are available:
+### Lewa strona
+- Ustawienia mapy (co ma byc przedstawione kolorami). Do wyboru:
+  - liczba zarejestrowanych pojazdow
+  - poszczegolne wspolczynniki (CO2, NOx, PM10, PM2.5 itp.)
+  - jakis inny wspolczynnik wyliczony na podstawie danych
+- Wybór roku
+- Mapa z województwami z kolorami
+  - Najechanie myszką na województwo pokazuje się dane
 
-- [@vitejs/plugin-react](https://github.com/vitejs/vite-plugin-react/blob/main/packages/plugin-react/README.md) uses [Babel](https://babeljs.io/) for Fast Refresh
-- [@vitejs/plugin-react-swc](https://github.com/vitejs/vite-plugin-react-swc) uses [SWC](https://swc.rs/) for Fast Refresh
+### Prawa strona
+- Tabela z danymi
+  - Wiersze: województwa
+  - Kolumny: dane (te same co do wyboru na mapie)
+  - Klikniecie na kolunmę (nazwe kolumny) sortuje dane
+  - Najechanie na wiersz podswietla wojeewództwo na mapie (i odwrotnie)
+  - Kazda kolumna ma skale kolorów (np. zielony - niskie, czerwony - wysokie)
+  - Opcja do pobierania danych wyswieconych w tabeli (w wybranym formacie)
 
-## Expanding the ESLint configuration
+## Nizej
 
-If you are developing a production application, we recommend updating the configuration to enable type aware lint rules:
-
-- Configure the top-level `parserOptions` property like this:
-
-```js
-export default {
-  // other rules...
-  parserOptions: {
-    ecmaVersion: 'latest',
-    sourceType: 'module',
-    project: ['./tsconfig.json', './tsconfig.node.json'],
-    tsconfigRootDir: __dirname,
-  },
-}
-```
-
-- Replace `plugin:@typescript-eslint/recommended` to `plugin:@typescript-eslint/recommended-type-checked` or `plugin:@typescript-eslint/strict-type-checked`
-- Optionally add `plugin:@typescript-eslint/stylistic-type-checked`
-- Install [eslint-plugin-react](https://github.com/jsx-eslint/eslint-plugin-react) and add `plugin:react/recommended` & `plugin:react/jsx-runtime` to the `extends` list
+- Wykresy
+  - Liniowy przedstawiajacy zmiane danego wspolczynnika w czasie (dla wszystkich województw)
+  - Kołowy przedstawiajacy udział danego wspolczynnika w całkowitym zanieczyszczeniu
+  - Slupkowy przedstawiajacy dane dla danego roku (dla wszystkich województw)
+  - Wykresy sa interaktywne (mozna wybrac województwa, lata, wspolczynniki tam gdzie to ma sens)
