@@ -37,10 +37,10 @@ export default function Home() {
       <MainNavbar/>
       <Container className={"mt-5 col-12 col-xl-8 mx-auto mb-5"}>
         <Row>
-          <div className={"text-center col-12 col-xl-5"}>
+          <div className={`text-center col-12 col-xl-5 ${style.map}`}>
             <PolandMap data={data}/>
           </div>
-          <div className={"col-12 col-xl-7"}>
+          <div className={`col-12 col-xl-7 ${style.table}`}>
             <Table bordered striped>
               <thead>
               <tr>

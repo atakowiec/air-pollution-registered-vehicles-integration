@@ -28,7 +28,7 @@ const router = createBrowserRouter([
     path: "/import",
     children: [
       {
-        path: "cepik/api",
+        path: "vehicles/api",
         element: <CepikApiImport />
       },
       {

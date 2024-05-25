@@ -5,3 +5,25 @@
   margin-top: 2rem;
   text-align: center;
 }
+
+.table {
+  transition: margin-left 0.3s ease-in-out;
+
+  @media (max-width: 1780px) {
+    padding-left: 10%; 
+  }
+
+  @media (max-width: 1480px) {
+    margin-top: 40px;
+    padding: auto;
+    width: 100%;
+  }
+}
+
+.map{
+  @media screen and (max-width: 1480px) {
+    flex: 0 0 auto;
+    width: 100%;
+    
+  }
+}
