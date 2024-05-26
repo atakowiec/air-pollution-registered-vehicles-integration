@@ -1,9 +1,7 @@
 import {MainNavbar} from "../../components/MainNavbar.tsx";
 import {title} from "../../util/title.ts";
-import PolandMap from "../../components/PolandMap.tsx";
 import useApi from "../../hooks/useApi.ts";
-import {Row, Table} from "react-bootstrap";
-import {formatNumber} from "../../util/utils.ts";
+import {Row} from "react-bootstrap";
 import Container from "react-bootstrap/Container";
 import style from "./Home.module.scss";
 import {
@@ -11,13 +9,13 @@ import {
   YAxis,
   CartesianGrid,
   Tooltip,
-  BarChart,
   Legend,
-  Bar,
   ResponsiveContainer,
   AreaChart,
   Area, PieChart, Pie, Radar, PolarAngleAxis, PolarRadiusAxis, PolarGrid, RadarChart
 } from "recharts";
+import VehiclesBarChart from "./components/VehiclesBarChart.tsx";
+import MapAndTable from "./components/MapAndTable.tsx";
 
 // todo its just an sample data for charts, remove it
 const SAMPLE_DATA = Array.from({length: 16}, (_, i) => ({
@@ -28,57 +26,15 @@ const SAMPLE_DATA = Array.from({length: 16}, (_, i) => ({
 
 export default function Home() {
   title("Home")
-  const {data, loaded} = useApi("/vehicles/counts/by-area-code", "get")
-
-  if (!loaded) return null
+  const vehiclesByAreaCode = useApi("/vehicles/counts/by-area-code", "get")
 
   return (
     <>
       <MainNavbar/>
-      <Container className={"mt-5 col-12 col-xl-8 mx-auto mb-5"}>
-        <Row>
-          <div className={`text-center col-12 col-xl-5 ${style.map}`}>
-            <PolandMap data={data}/>
-          </div>
-          <div className={`col-12 col-xl-7 ${style.table}`}>
-            <Table bordered striped>
-              <thead>
-              <tr>
-                <th>Kod pocztowy</th>
-                <th>Liczba pojazdów</th>
-                <th>Jakies inne dane</th>
-              </tr>
-              </thead>
-              <tbody>
-              {Object.keys(data).map((key) => (
-                <tr key={key}>
-                  <td>{key}</td>
-                  <td>{formatNumber(data[key])}</td>
-                  <td>...</td>
-                </tr>
-              ))}
-              </tbody>
-            </Table>
-          </div>
-        </Row>
+      <Container className={"mt-5 col-12 col-xxl-8 mx-auto mb-5"}>
+        <MapAndTable apiData={vehiclesByAreaCode} />
         <Row className={"mt-5"}>
-          <div className={"col-12 col-xl-6"}>
-            <h3 className={style.chartTitle}>
-              Przykładowy wykres słupkowy
-            </h3>
-            <ResponsiveContainer width={"100%"} height={300} className={"rounded-2"}>
-              {/*this chart does not work well with this number of data points (names are too long), but we will find out how to fix it*/}
-              <BarChart data={SAMPLE_DATA} className={"col-6"}>
-                <CartesianGrid strokeDasharray="3 3"/>
-                <XAxis dataKey={"name"}/>
-                <YAxis/>
-                <Tooltip/>
-                <Legend/>
-                <Bar dataKey="value1" fill="#8884d8"/>
-                <Bar dataKey="value2" fill="#82ca9d"/>
-              </BarChart>
-            </ResponsiveContainer>
-          </div>
+          <VehiclesBarChart apiData={vehiclesByAreaCode}/>
           <div className={"col-12 col-xl-6"}>
             <h3 className={style.chartTitle}>
               Przykładowy wykres liniowy

@@ -2,7 +2,7 @@ import React, { useContext, useEffect, useRef, useState } from 'react';
 import {getApi} from '../axios/axios.ts';
 import { ReloadApiContext } from './reload-api/ReloadApiContext.tsx';
 
-export interface ApiData<T> {
+export interface ApiData<T = any> {
     data: T | null | undefined
     loaded: boolean
     error: boolean | Error

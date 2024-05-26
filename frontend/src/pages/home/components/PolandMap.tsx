@@ -1,4 +1,5 @@
 import {CSSProperties} from "react";
+import {ApiData} from "../../../hooks/useApi.ts";
 
 export const VOIVODESHIPS = [
   "DOLNOŚLĄSKIE",
@@ -16,26 +17,28 @@ export const VOIVODESHIPS = [
   "ŚWIĘTOKRZYSKIE",
   "WARMIŃSKO-MAZURSKIE",
   "WIELKOPOLSKIE",
-  "ZACHODNIOPOMORSKIE"
+  "ZACHODNIOPOMORSKIE",
+  "NIEOKREŚLONE"
 ]
 
 interface PolandMapProps {
   color?: string;
-  className?: string;
-  data: {
-    [key: string]: number;
-  };
+  apiData: ApiData<Data>
 }
 
-export default function PolandMap({data, color = "#94add6", className}: PolandMapProps) {
-  const max = Math.max(...Object.values(data))
-  const min = Math.min(...Object.values(data))
+interface Data {
+  [key: string]: number
+}
+
+export default function PolandMap({apiData, color = "#94add6"}: PolandMapProps) {
+  const max = Math.max(...Object.values(apiData.data ?? {}))
+  const min = Math.min(...Object.values(apiData.data ?? {}))
   const range = max - min
 
   // todo im going to refactor this but now it works
 
   function getStyle(voivodeship: string): CSSProperties {
-    const value = data[voivodeship]
+    const value = apiData.data?.[voivodeship]
     if (value === undefined) return {
       fill: "#e8e8e8",
       fillOpacity: 1
@@ -48,7 +51,6 @@ export default function PolandMap({data, color = "#94add6", className}: PolandMa
 
   return (
     <svg
-      className={className}
       xmlns="http://www.w3.org/2000/svg"
       version="1.0"
       width="497"

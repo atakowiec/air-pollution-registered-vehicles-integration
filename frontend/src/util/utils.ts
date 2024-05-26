@@ -14,3 +14,12 @@ export function formatDuration(duration: number) {
 export function formatNumber(number: number) {
   return new Intl.NumberFormat().format(number)
 }
+
+export function isEmpty(value: any) {
+  if(Array.isArray(value)) return value.length === 0
+
+  if(typeof value === "object" && value !== null)
+    return Object.keys(value).length == 0
+
+  return false;
+}
