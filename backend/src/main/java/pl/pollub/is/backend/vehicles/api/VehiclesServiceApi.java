@@ -1,10 +1,13 @@
-package pl.pollub.is.backend.vehicles;
+package pl.pollub.is.backend.vehicles.api;
 
 import com.fasterxml.jackson.databind.JsonNode;
 import com.fasterxml.jackson.databind.ObjectMapper;
-import org.springframework.beans.factory.annotation.Autowired;
+import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Service;
-
+import pl.pollub.is.backend.cache.DatabaseCacheService;
+import pl.pollub.is.backend.cache.supplier.CacheDependency;
+import pl.pollub.is.backend.vehicles.VehiclesRepository;
+import pl.pollub.is.backend.vehicles.model.Vehicle;
 
 import java.io.BufferedReader;
 import java.io.IOException;
@@ -19,14 +22,10 @@ import java.util.Date;
 import static com.microsoft.sqlserver.jdbc.StringUtils.isNumeric;
 
 @Service
+@RequiredArgsConstructor
 public class VehiclesServiceApi {
-
     private final VehiclesRepository vehiclesRepository;
-
-    @Autowired
-    public VehiclesServiceApi(VehiclesRepository vehiclesRepository) {
-        this.vehiclesRepository = vehiclesRepository;
-    }
+    private final DatabaseCacheService cacheService;
 
     public void processJsonFromUrl(String jsonString) throws IOException, ParseException {
         ObjectMapper objectMapper = new ObjectMapper();
@@ -53,6 +52,7 @@ public class VehiclesServiceApi {
             throw new IllegalStateException("Missing 'apiUrl' field in vehicle JSON.");
         }
 
+        cacheService.onDependencyChange(CacheDependency.VEHICLES_DATA);
     }
 
     private void processVehicleArray(JsonNode dataNode) throws ParseException {

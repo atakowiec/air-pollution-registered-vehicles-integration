@@ -1,4 +1,4 @@
-package pl.pollub.is.backend.vehicles;
+package pl.pollub.is.backend.vehicles.model;
 
 import jakarta.persistence.*;
 import lombok.Data;

@@ -17,6 +17,10 @@ public class SimpleJsonBuilder {
         return new SimpleJsonBuilder().add(key, value);
     }
 
+    public static SimpleJsonBuilder empty() {
+        return new SimpleJsonBuilder();
+    }
+
     public SimpleJsonBuilder add(String key, Object value) {
         json.put(key, value);
         return this;
@@ -26,7 +30,11 @@ public class SimpleJsonBuilder {
         return json;
     }
 
-    public String toJson() throws JsonProcessingException {
-        return new ObjectMapper().writeValueAsString(json);
+    public String toJson() {
+        try {
+            return new ObjectMapper().writeValueAsString(json);
+        } catch (JsonProcessingException e) {
+            throw new RuntimeException(e);
+        }
     }
 }

@@ -1,6 +1,5 @@
 package pl.pollub.is.backend.exception;
 
-import com.fasterxml.jackson.core.JsonProcessingException;
 import lombok.Getter;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.MediaType;
@@ -20,7 +19,7 @@ public class HttpException extends RuntimeException {
         this(HttpStatus.valueOf(statusCode), message);
     }
 
-    public ResponseEntity<String> toResponseEntity() throws JsonProcessingException {
+    public ResponseEntity<String> toResponseEntity() {
         return ResponseEntity
                 .status(httpStatus)
                 .contentType(MediaType.APPLICATION_JSON)

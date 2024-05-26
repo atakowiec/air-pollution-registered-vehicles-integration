@@ -1,6 +1,5 @@
 package pl.pollub.is.backend.progress.model;
 
-import com.fasterxml.jackson.core.JsonProcessingException;
 import lombok.Getter;
 import lombok.Setter;
 import org.springframework.http.HttpStatus;
@@ -24,14 +23,14 @@ public class Progress {
         this.clear();
     }
 
-    public String toJson() throws JsonProcessingException {
+    public String toJson() {
         return SimpleJsonBuilder.of("key", key)
                 .add("status", status)
                 .add("data", progressData)
                 .toJson();
     }
 
-    public ResponseEntity<String> toResponseEntity() throws JsonProcessingException {
+    public ResponseEntity<String> toResponseEntity() {
         return ResponseEntity
                 .status(HttpStatus.OK)
                 .contentType(MediaType.APPLICATION_JSON)

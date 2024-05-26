@@ -1,4 +1,4 @@
-package pl.pollub.is.backend.vehicles;
+package pl.pollub.is.backend.vehicles.model;
 
 import lombok.Getter;
 import pl.pollub.is.backend.progress.model.Progress;

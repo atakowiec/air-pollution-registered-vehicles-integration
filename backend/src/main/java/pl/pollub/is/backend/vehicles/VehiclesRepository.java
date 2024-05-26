@@ -2,6 +2,7 @@ package pl.pollub.is.backend.vehicles;
 
 import org.springframework.data.jpa.repository.JpaRepository;
 import org.springframework.data.jpa.repository.Query;
+import pl.pollub.is.backend.vehicles.model.Vehicle;
 
 import java.util.List;
 
