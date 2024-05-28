@@ -4,7 +4,9 @@ import org.springframework.stereotype.Service;
 import pl.pollub.is.backend.cache.DatabaseCacheService;
 import pl.pollub.is.backend.cache.supplier.CacheDependency;
 import pl.pollub.is.backend.util.SimpleJsonBuilder;
+import pl.pollub.is.backend.vehicles.model.Vehicle;
 
+import java.util.Date;
 import java.util.List;
 
 @Service
@@ -38,5 +40,12 @@ public class VehiclesService {
 
     public String getVehiclesCountByAreaCode() {
         return cacheService.getValue(VEHICLES_BY_AREA_CODE_KEY);
+    }
+
+    public List<Vehicle> getVehiclesByAreaCodeAndRegistrationYear(String areaCode, int year) {
+        System.out.println("Fetching vehicles for areaCode: " + areaCode + " and year: " + year);
+        List<Vehicle> vehicles = vehiclesRepository.findVehiclesByAreaCodeAndRegistrationYear(areaCode, year);
+        System.out.println("Found " + vehicles.size() + " vehicles");
+        return vehicles;
     }
 }
