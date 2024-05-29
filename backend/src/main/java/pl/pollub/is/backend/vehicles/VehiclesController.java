@@ -33,4 +33,11 @@ public class VehiclesController {
         List<Vehicle> vehicles = vehiclesService.getVehiclesByAreaCodeAndRegistrationYear(areaCode, year);
         return ResponseEntity.ok(vehicles);
     }
+
+    @GetMapping("/counts/by-year")
+    public ResponseEntity<List<Object[]>> getVehiclesByYear(
+            @RequestParam @DateTimeFormat(pattern = "yyyy") int year) {
+        List<Object[]> vehiclesCountByYear = vehiclesService.getVehiclesCountByYear(year);
+        return ResponseEntity.ok(vehiclesCountByYear);
+    }
 }

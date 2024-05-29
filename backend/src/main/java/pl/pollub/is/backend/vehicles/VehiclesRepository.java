@@ -13,7 +13,7 @@ public interface VehiclesRepository extends JpaRepository<Vehicle, Integer> {
     @Query("SELECT v.areaCode, COUNT(v) FROM Vehicle v GROUP BY v.areaCode")
     List<Object[]> countVehiclesByAreaCode();
 
-    @Query(value = "SELECT * FROM vehicles WHERE area_code = :areaCode AND manufacture_year = :year " +
+    @Query(value = "SELECT * FROM vehicles WHERE area_code = :areaCode " +
             "AND first_registration_date <= CONCAT(:year, '-12-31') " +
             "AND (deregistration_date IS NULL OR deregistration_date >= CONCAT(:year, '-01-01'))",
             nativeQuery = true)
@@ -22,4 +22,10 @@ public interface VehiclesRepository extends JpaRepository<Vehicle, Integer> {
             @Param("year") int year
     );
 
+    @Query(value = "SELECT area_code, COUNT(*) FROM vehicles " +
+            "WHERE first_registration_date <= CONCAT(:year, '-12-31') " +
+            "AND (deregistration_date IS NULL OR deregistration_date >= CONCAT(:year, '-01-01')) " +
+            "GROUP BY area_code",
+            nativeQuery = true)
+    List<Object[]> countVehiclesByYear(@Param("year") int year);
 }

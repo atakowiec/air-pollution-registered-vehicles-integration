@@ -48,4 +48,10 @@ public class VehiclesService {
         System.out.println("Found " + vehicles.size() + " vehicles");
         return vehicles;
     }
+
+    public List<Object[]> getVehiclesCountByYear(int year) {
+        List<Object[]> result = vehiclesRepository.countVehiclesByYear(year);
+        System.out.println("Found " + result.size() + " area codes with vehicle counts");
+        return result;
+    }
 }
