@@ -15,7 +15,7 @@ import java.util.stream.Stream;
 @Service
 @RequiredArgsConstructor
 public class AirPollutionService {
-    private final static List<String> ALLOWED_INDICATORS = List.of("SO2", "NO2", "NOx", "CO", "O3");
+    private final static List<String> ALLOWED_INDICATORS = List.of("SO2", "NO2", "PM2,5", "Pb(PM10)", "NOx");
     private final static List<String> COLUMN_NAMES = List.of("Rok", "Województwo", "Kod strefy", "Kod stacji", "Wskaźnik", "Czas uśredniania", "Średnia", "Liczba pomiarów");
 
     private final AirPollutionRepository airPollutionRepository;
@@ -64,7 +64,18 @@ public class AirPollutionService {
                 airPollution.setIndicator(getCellValue(row, columnIndexes.get("Wskaźnik"), String.class));
                 airPollution.setAveragingPeriod(getCellValue(row, columnIndexes.get("Czas uśredniania"), String.class));
                 airPollution.setAverage(getCellValue(row, columnIndexes.get("Średnia"), Double.class));
-                airPollution.setSamples(getCellValue(row, columnIndexes.get("Liczba pomiarów"), Integer.class));
+                Integer columnIndex = columnIndexes.get("Liczba pomiarów");
+                Integer samples = null;
+                if (columnIndex != null) {
+                    samples = getCellValue(row, columnIndex, Integer.class);
+                }
+                if (samples == null) {
+                    columnIndex = columnIndexes.get("Liczba ważnych pom");
+                    if (columnIndex != null) {
+                        samples = getCellValue(row, columnIndex, Integer.class);
+                    }
+                }
+                airPollution.setSamples(samples);
 
                 // save airPollution to database
                 toSave.add(airPollution);

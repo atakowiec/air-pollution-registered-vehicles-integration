@@ -43,15 +43,12 @@ public class VehiclesService {
     }
 
     public List<Vehicle> getVehiclesByAreaCodeAndRegistrationYear(String areaCode, int year) {
-        System.out.println("Fetching vehicles for areaCode: " + areaCode + " and year: " + year);
         List<Vehicle> vehicles = vehiclesRepository.findVehiclesByAreaCodeAndRegistrationYear(areaCode, year);
-        System.out.println("Found " + vehicles.size() + " vehicles");
         return vehicles;
     }
 
     public List<Object[]> getVehiclesCountByYear(int year) {
         List<Object[]> result = vehiclesRepository.countVehiclesByYear(year);
-        System.out.println("Found " + result.size() + " area codes with vehicle counts");
         return result;
     }
 }
