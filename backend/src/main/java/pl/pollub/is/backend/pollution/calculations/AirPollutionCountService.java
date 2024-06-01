@@ -22,4 +22,9 @@ public class AirPollutionCountService {
         List<Object[]> result = airPollutionRepository.findAveragePollutionByIndicatorAndYearInVoivodeship(indicator, year, voivodeship);
         return result;
     }
+
+    public List<Object[]> getAveragePollutionByYear(int year) {
+        return airPollutionRepository.findAveragePollutionByYear(year);
+    }
+
 }

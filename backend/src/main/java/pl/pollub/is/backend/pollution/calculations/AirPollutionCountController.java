@@ -31,4 +31,11 @@ public class AirPollutionCountController {
         List<Object[]> averagePollutionData = airPollutionService.getAveragePollutionByIndicatorAndYearInVoivodeship(indicator, year, voivodeship);
         return ResponseEntity.ok(averagePollutionData);
     }
+
+    @GetMapping("/counts/average-by-year")
+    public ResponseEntity<List<Object[]>> getAveragePollutionByYear(
+            @RequestParam int year ){
+        List<Object[]> averagePollutionData = airPollutionService.getAveragePollutionByYear(year);
+        return ResponseEntity.ok(averagePollutionData);
+    }
 }

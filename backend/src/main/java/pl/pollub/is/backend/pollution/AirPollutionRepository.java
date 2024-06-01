@@ -36,4 +36,12 @@ public interface AirPollutionRepository extends JpaRepository<AirPollution, Inte
             @Param("year") int year,
             @Param("voivodeship") String voivodeship
     );
+
+    @Query(value = "SELECT voivodeship, indicator, AVG(average) as avg_pollution " +
+            "FROM air_pollution " +
+            "WHERE year = :year " +
+            "GROUP BY voivodeship, indicator",
+            nativeQuery = true)
+    List<Object[]> findAveragePollutionByYear(@Param("year") int year);
+
 }
