@@ -8,6 +8,8 @@
 
 .table {
   transition: margin-left 0.3s ease-in-out;
+  overflow-x: auto;
+  max-width: 100%;
 
   @media (max-width: 1780px) {
     padding-left: 10%;
@@ -17,6 +19,11 @@
     margin-top: 40px;
     width: 100%;
   }
+}
+
+.scrollableTableWrapper {
+  overflow-x: auto;
+  max-width: 100%;
 }
 
 .map {

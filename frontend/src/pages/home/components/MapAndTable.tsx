@@ -28,53 +28,70 @@ const VOIVODESHIPS = {
   XX: "nieokreślone",
 };
 
-// todo
-//przerobic, by mozna bylo wybrac tylko rok i w tabeli wszystkie dane sie wyswietla
-//przerobic pierwiastki by nie byly select tylko tablica z wybiraniem i mozliwosci usuwania
-//zrobic dobre wykresy
-
 export default function MapAndTable({ apiData }: PropsWithApiData) {
-  const [selectedIndicator, setSelectedIndicator] = useState(INDICATORS[0]);
-  const [selectedYear, setSelectedYear] = useState(YEARS[0]);
-  const [selectedVoivodeship, setSelectedVoivodeship] = useState("");
+  const [selectedIndicator, setSelectedIndicator] = useState<string | null>(
+    null
+  );
+  const [selectedYear, setSelectedYear] = useState<number | null>(null);
+  const [selectedVoivodeship, setSelectedVoivodeship] = useState<string>("");
 
+  //todo: wykresy
   const airPollutionData = useApi(
-    `/air-pollution/counts/average-by-indicator-and-year?indicator=${selectedIndicator}&year=${selectedYear}`,
+    selectedIndicator && selectedYear
+      ? `/air-pollution/counts/average-by-indicator-and-year?indicator=${selectedIndicator}&year=${selectedYear}`
+      : selectedYear
+      ? `/air-pollution/counts/average-by-year?year=${selectedYear}`
+      : "",
     "get"
   );
 
   const handleIndicatorChange = (
     event: React.ChangeEvent<HTMLSelectElement>
   ) => {
-    setSelectedIndicator(event.target.value);
+    setSelectedIndicator(event.target.value || null);
   };
 
   const handleYearChange = (event: React.ChangeEvent<HTMLSelectElement>) => {
-    setSelectedYear(Number(event.target.value));
+    setSelectedYear(event.target.value ? Number(event.target.value) : null);
   };
 
-  const findAirPollution = (voivodeship: string) => {
-    if (!airPollutionData.data) {
+  const findAirPollution = (voivodeship: string, indicator: string) => {
+    if (!Array.isArray(airPollutionData.data)) {
       return "N/A";
     }
-  
-    const data = airPollutionData.data.find(
-      ([name]: [string, number]) => name === voivodeship
-    );
-    return data ? data[1] : "N/A";
+    const newDataFormat = airPollutionData.data[0]?.length === 3;
+
+    if (newDataFormat) {
+      const data = airPollutionData.data.find(
+        ([name, ind]: [string, string, number]) =>
+          name === voivodeship && ind === indicator
+      );
+      return data ? data[2] : "N/A";
+    } else {
+      const data = airPollutionData.data.find(
+        ([name]: [string, number]) => name === voivodeship
+      );
+      return data ? data[1] : "N/A";
+    }
   };
 
-  const pollutionData = apiData.data 
-  ? (Object.keys(apiData.data) as Array<keyof typeof VOIVODESHIPS>).reduce((acc, key) => {
-      const voivodeshipName = VOIVODESHIPS[key];
-      acc[voivodeshipName] = {
-        name: voivodeshipName,
-        averagePollution: findAirPollution(voivodeshipName)
-      };
-      return acc;
-    }, {} as Record<string, { name: string, averagePollution: number | 'N/A' }>)
-  : {};
-  
+  const pollutionData = apiData.data
+    ? (Object.keys(apiData.data) as Array<keyof typeof VOIVODESHIPS>).reduce(
+        (acc, key) => {
+          const voivodeshipName = VOIVODESHIPS[key];
+          acc[voivodeshipName] = {
+            name: voivodeshipName,
+            averagePollution: findAirPollution(
+              voivodeshipName,
+              selectedIndicator || ""
+            ),
+          };
+          return acc;
+        },
+        {} as Record<string, { name: string; averagePollution: number | "N/A" }>
+      )
+    : {};
+
   console.log(pollutionData);
 
   return (
@@ -88,10 +105,11 @@ export default function MapAndTable({ apiData }: PropsWithApiData) {
             <div className="col-auto text-center">
               <div className="">
                 <select
-                  value={selectedIndicator}
+                  value={selectedIndicator || ""}
                   onChange={handleIndicatorChange}
                   className="form-select"
                 >
+                  <option value="">Wybierz pierwiastek</option>
                   {INDICATORS.map((indicator) => (
                     <option key={indicator} value={indicator}>
                       {indicator}
@@ -106,10 +124,11 @@ export default function MapAndTable({ apiData }: PropsWithApiData) {
             <div className="col-auto text-center">
               <div className="">
                 <select
-                  value={selectedYear}
+                  value={selectedYear !== null ? selectedYear : ""}
                   onChange={handleYearChange}
                   className="form-select"
                 >
+                  <option value="">Wybierz rok</option>
                   {YEARS.map((year) => (
                     <option key={year} value={year}>
                       {year}
@@ -126,38 +145,68 @@ export default function MapAndTable({ apiData }: PropsWithApiData) {
           className={`text-center col-12 col-xxl-5 ${style.map} position-relative`}
         >
           <ChartStatusOverlay apiData={apiData} backgroundType={"none"} />
-          <PolandMap apiData={apiData} pollutionData={pollutionData}/>
+          <PolandMap apiData={apiData} pollutionData={pollutionData} />
         </div>
         <div className={`col-12 col-xxl-7 ${style.table}`}>
-          <Table bordered striped={apiData.data ? true : undefined}>
-            <thead>
-              <tr>
-                <th>Województwo</th>
-                <th>Liczba pojazdów</th>
-                <th>Średnie zanieczyszczenie {selectedIndicator}</th>
-              </tr>
-            </thead>
-            <tbody>
-              {apiData.data
-                ? (
-                    Object.keys(apiData.data) as Array<
-                      keyof typeof VOIVODESHIPS
-                    >
-                  ).map((key) => {
-                    const voivodeshipName = VOIVODESHIPS[key];
-                    return (
-                      <tr key={key}>
-                        <td>{voivodeshipName}</td>
-                        <td>{formatNumber(apiData.data[key])}</td>
-                        <td>{findAirPollution(voivodeshipName)}</td>
-                      </tr>
-                    );
-                  })
-                : Array.from({ length: 10 }, (_, i) => (
-                    <LoadingRow key={i} i={i} />
-                  ))}
-            </tbody>
-          </Table>
+          <div className={style.scrollableTableWrapper}>
+            <Table bordered striped={apiData.data ? true : undefined}>
+              <thead>
+                <tr>
+                  <th>Województwo</th>
+                  <th>Liczba pojazdów</th>
+                  {selectedYear &&
+                    !selectedIndicator &&
+                    INDICATORS.map((indicator) => (
+                      <th key={indicator}>{indicator}</th>
+                    ))}
+                  {selectedIndicator && selectedYear && (
+                    <th>Średnie zanieczyszczenie {selectedIndicator}</th>
+                  )}
+                </tr>
+              </thead>
+              <tbody>
+                {apiData.data
+                  ? (
+                      Object.keys(apiData.data) as Array<
+                        keyof typeof VOIVODESHIPS
+                      >
+                    ).map((key) => {
+                      const voivodeshipName = VOIVODESHIPS[key];
+                      if (selectedYear && !selectedIndicator) {
+                        return (
+                          <tr key={key}>
+                            <td>{voivodeshipName}</td>
+                            <td>{formatNumber(apiData.data[key])}</td>
+                            {INDICATORS.map((indicator) => (
+                              <td key={indicator}>
+                                {findAirPollution(voivodeshipName, indicator)}
+                              </td>
+                            ))}
+                          </tr>
+                        );
+                      } else if (selectedIndicator && selectedYear) {
+                        return (
+                          <tr key={key}>
+                            <td>{voivodeshipName}</td>
+                            <td>{formatNumber(apiData.data[key])}</td>
+                            <td>
+                              {findAirPollution(
+                                voivodeshipName,
+                                selectedIndicator
+                              )}
+                            </td>
+                          </tr>
+                        );
+                      } else {
+                        return null;
+                      }
+                    })
+                  : Array.from({ length: 10 }, (_, i) => (
+                      <LoadingRow key={i} i={i} />
+                    ))}
+              </tbody>
+            </Table>
+          </div>
         </div>
       </Row>
     </>

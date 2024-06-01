@@ -45,8 +45,6 @@ export default function PolandMap({
   const min = Math.min(...numericValues);
   const range = max - min;
 
-  console.log(pollutionData);
-
   // todo im going to refactor this but now it works
   //todo: make it reset after changing values in select
 
