@@ -26,6 +26,16 @@
       background-color: #ddd;
     }
   }
+
+  th {
+    white-space: nowrap;
+    cursor: pointer;
+    text-align: center;
+
+    &:hover {
+      background-color: #f0f0f0;
+    }
+  }
 }
 
 .scrollableTableWrapper {
