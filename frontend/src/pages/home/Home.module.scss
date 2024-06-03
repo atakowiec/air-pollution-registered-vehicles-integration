@@ -19,6 +19,13 @@
     margin-top: 40px;
     width: 100%;
   }
+
+  .hoveredRow {
+    //border: 1px solid #94add6;
+    td {
+      background-color: #ddd;
+    }
+  }
 }
 
 .scrollableTableWrapper {

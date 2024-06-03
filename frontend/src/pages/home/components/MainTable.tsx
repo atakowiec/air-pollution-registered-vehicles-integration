@@ -7,10 +7,12 @@ import {MergedData, VoivodeshipData, YearData} from "../hooks/HomeDataContext.ts
 interface TableProps {
   data: YearData | null | undefined
   selectedIndicator: string | null
+  hoveredVoivodeship: string | null;
+  setHoveredVoivodeship: (voivodeship: string | null) => void;
 }
 
 
-export default function MainTable({data: finalData, selectedIndicator}: TableProps) {
+export default function MainTable({data: finalData, selectedIndicator, setHoveredVoivodeship, hoveredVoivodeship}: TableProps) {
   const TABLE_HEADERS = ["registrations", "deregistrations", ...INDICATORS]
 
   return (
@@ -33,7 +35,10 @@ export default function MainTable({data: finalData, selectedIndicator}: TablePro
           {finalData
             ? (Object.keys(finalData) as Array<keyof MergedData>)
               .map((voivodeshipName) => (
-                <tr key={voivodeshipName}>
+                <tr key={voivodeshipName}
+                    className={hoveredVoivodeship === voivodeshipName.toString() ? style.hoveredRow : undefined}
+                    onMouseEnter={() => setHoveredVoivodeship(voivodeshipName.toString())}
+                    onMouseLeave={() => setHoveredVoivodeship(null)}>
                   <td>{voivodeshipName}</td>
                   {TABLE_HEADERS.map((indicator) => (
                     <td key={indicator} style={{fontWeight: indicator == selectedIndicator ? "bold" : undefined}}>
@@ -57,6 +62,7 @@ function LoadingRow({i}: { i: number }) {
     <tr>
       {Array.from({length: 2 + INDICATORS.length}, (_, j) => (
         <td
+          key={`td-${j}`}
           className={style.loadingRow}
           style={{animationDelay: `${i * 0.1 + j * 0.1}s`}}
         >

@@ -31,10 +31,10 @@ export const VOIVODESHIPS = {
 export default function MapAndTable() {
   const [selectedIndicator, setSelectedIndicator] = useState<string | null>("registrations");
   const [selectedYear, setSelectedYear] = useState<number | null>(null);
+  const [hoveredVoivodeship, setHoveredVoivodeship] = useState<string | null>(null);
   const mergedData = useMergedData()
   const cumulativeData = useCumulativeData();
 
-  console.log(useCumulativeData())
   const finalData = selectedYear ?
     mergedData.data?.[selectedYear] :
     cumulativeData.data ?
@@ -101,10 +101,14 @@ export default function MapAndTable() {
           <ChartStatusOverlay apiData={mergedData} backgroundType={"none"}/>
           <PolandMap
             data={finalData}
+            hoveredVoivodeship={hoveredVoivodeship}
+            setHoveredVoivodeship={setHoveredVoivodeship}
             selectedIndicator={selectedIndicator} />
         </div>
         <MainTable
           data={finalData}
+          hoveredVoivodeship={hoveredVoivodeship}
+          setHoveredVoivodeship={setHoveredVoivodeship}
           selectedIndicator={selectedIndicator}/>
       </Row>
     </>
