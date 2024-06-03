@@ -1,10 +1,11 @@
 package pl.pollub.is.backend.pollution.calculations;
 
 import lombok.RequiredArgsConstructor;
+import org.springframework.http.MediaType;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.GetMapping;
-import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.bind.annotation.RequestMapping;
+import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.bind.annotation.RestController;
 
 import java.util.List;
@@ -37,5 +38,13 @@ public class AirPollutionCountController {
             @RequestParam int year ){
         List<Object[]> averagePollutionData = airPollutionService.getAveragePollutionByYear(year);
         return ResponseEntity.ok(averagePollutionData);
+    }
+
+    @GetMapping("/counts/average-by-year-voivodeship-indicator")
+    public ResponseEntity<String> getAverageByYearVoivodeshipAndIndicator() {
+        String averagePollutionData = airPollutionService.getAverageByYearVoivodeshipAndIndicator();
+        return ResponseEntity.ok()
+                .contentType(MediaType.APPLICATION_JSON)
+                .body(averagePollutionData);
     }
 }

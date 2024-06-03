@@ -44,4 +44,9 @@ public interface AirPollutionRepository extends JpaRepository<AirPollution, Inte
             nativeQuery = true)
     List<Object[]> findAveragePollutionByYear(@Param("year") int year);
 
+    @Query(value = "SELECT year, voivodeship, indicator, AVG(average) FROM `air_pollution` " +
+            "WHERE year BETWEEN 2000 AND 2019 " +
+            "GROUP BY `year`, `voivodeship`, `indicator`", nativeQuery = true)
+    List<Object[]> averageByYearVoivodeshipAndIndicator();
+
 }

@@ -6,7 +6,7 @@ export interface ApiData<T = any> {
     data: T | null | undefined
     loaded: boolean
     error: boolean | Error
-    setData: React.Dispatch<any>
+    setData?: React.Dispatch<any>
 }
 
 /**
@@ -29,6 +29,12 @@ export default function useApi<DataType = any>(path: string, method: string, pay
 
     // fetch the data from the API
     useEffect(() => {
+        if(!path || !method) {
+            setData(null)
+            isLoaded.current = true;
+            return;
+        }
+
         isLoaded.current = false;
         console.log({path, method}); // print the path and method to the console for debugging
         (getApi() as any)[method](path, payload)

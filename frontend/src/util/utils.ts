@@ -12,6 +12,8 @@ export function formatDuration(duration: number) {
 }
 
 export function formatNumber(number: number) {
+  if(isNaN(number)) return "-"
+
   return new Intl.NumberFormat().format(number)
 }
 

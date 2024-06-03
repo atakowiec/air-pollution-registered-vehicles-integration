@@ -10,7 +10,6 @@ import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.bind.annotation.RestController;
 import pl.pollub.is.backend.vehicles.model.Vehicle;
 
-import java.util.Date;
 import java.util.List;
 
 @RestController
@@ -39,5 +38,19 @@ public class VehiclesController {
             @RequestParam @DateTimeFormat(pattern = "yyyy") int year) {
         List<Object[]> vehiclesCountByYear = vehiclesService.getVehiclesCountByYear(year);
         return ResponseEntity.ok(vehiclesCountByYear);
+    }
+
+    @GetMapping("/counts/registrations-by-area-code-and-voivodeships")
+    public Object getRegistrationsByAreaCodeAndVoivodeships() {
+        return ResponseEntity.ok()
+                .contentType(MediaType.APPLICATION_JSON)
+                .body(vehiclesService.getRegistrationsByAreaCodeAndVoivodeships());
+    }
+
+    @GetMapping("/counts/deregistrations-by-area-code-and-voivodeships")
+    public Object getDeregistrationsByAreaCodeAndVoivodeships() {
+        return ResponseEntity.ok()
+                .contentType(MediaType.APPLICATION_JSON)
+                .body(vehiclesService.getDeregistrationsByAreaCodeAndVoivodeships());
     }
 }

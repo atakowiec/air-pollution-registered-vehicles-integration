@@ -4,6 +4,8 @@ import lombok.RequiredArgsConstructor;
 import org.dhatim.fastexcel.reader.*;
 import org.springframework.stereotype.Service;
 import org.springframework.web.multipart.MultipartFile;
+import pl.pollub.is.backend.cache.DatabaseCacheService;
+import pl.pollub.is.backend.cache.supplier.CacheDependency;
 
 import java.io.IOException;
 import java.util.ArrayList;
@@ -19,6 +21,7 @@ public class AirPollutionService {
     private final static List<String> COLUMN_NAMES = List.of("Rok", "Województwo", "Kod strefy", "Kod stacji", "Wskaźnik", "Czas uśredniania", "Średnia", "Liczba pomiarów");
 
     private final AirPollutionRepository airPollutionRepository;
+    private final DatabaseCacheService cacheService;
 
     public Map<String, Integer> handleFileUpload(MultipartFile multipartFile) throws IOException {
         Map<String, Integer> savedIndicators = new HashMap<>();
@@ -35,6 +38,7 @@ public class AirPollutionService {
             return;
 
         airPollutionRepository.deleteAllInBatchByIndicator(sheet.getName());
+        cacheService.onDependencyChange(CacheDependency.POLLUTION_DATA);
         try (Stream<Row> rowStream = sheet.openStream()) {
             Map<String, Integer> columnIndexes = new HashMap<>();
             List<AirPollution> toSave = new ArrayList<>();
@@ -85,6 +89,7 @@ public class AirPollutionService {
             });
 
             airPollutionRepository.saveAll(toSave);
+            cacheService.onDependencyChange(CacheDependency.POLLUTION_DATA);
         } catch (IOException e) {
             throw new RuntimeException(e);
         }

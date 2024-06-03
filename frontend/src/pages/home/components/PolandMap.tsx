@@ -1,5 +1,5 @@
-import { CSSProperties } from "react";
-import { ApiData } from "../../../hooks/useApi.ts";
+import {CSSProperties, useMemo} from "react";
+import {VoivodeshipData, YearData} from "../hooks/HomeDataContext.tsx";
 
 export const VOIVODESHIPS = [
   "DOLNOŚLĄSKIE",
@@ -22,42 +22,39 @@ export const VOIVODESHIPS = [
 ];
 
 interface PolandMapProps {
+  data?: YearData
   color?: string;
-  apiData: ApiData<Data>;
-  pollutionData: Record<
-    string,
-    { name: string; averagePollution: number | "N/A" }
-  >;
+  selectedIndicator: string | null;
 }
 
-interface Data {
-  [key: string]: number;
-}
+export default function PolandMap({color = "#94add6", selectedIndicator, data: finalData}: PolandMapProps) {
+  const indicator: keyof VoivodeshipData = selectedIndicator as keyof VoivodeshipData ?? "registrations";
 
-export default function PolandMap({
-  pollutionData,
-  color = "#94add6",
-}: PolandMapProps) {
-  const numericValues = Object.values(pollutionData.data ?? {}).filter(
-    (value): value is number => typeof value === "number"
-  );
-  const max = Math.max(...numericValues);
-  const min = Math.min(...numericValues);
-  const range = max - min;
+  const [min, range] = useMemo(() => {
+    if (!finalData)
+      return [0, 0];
 
-  // todo im going to refactor this but now it works
-  //todo: make it reset after changing values in select
+    let numericValues: number[] = Object.values(finalData)
+      .map(voivodeship => voivodeship[indicator] ?? -1)
+      .filter(value => value != -1);
+
+    const max = Math.max(...numericValues);
+    const min = Math.min(...numericValues);
+    const range = min == max ? max : max - min;
+
+    return [min, range];
+  }, [finalData, selectedIndicator])
 
   function getStyle(voivodeship: string): CSSProperties {
-    const value = pollutionData[voivodeship.toLowerCase()];
-    if (value === undefined || value.averagePollution === 'N/A')
+    const value = finalData?.[voivodeship.toLowerCase()]?.[indicator];
+    if (value === undefined || range == 0)
       return {
         fill: "#e8e8e8",
         fillOpacity: 1,
       };
     return {
       fill: color,
-      fillOpacity: (value.averagePollution - min) / range * 0.5 + 0.5,
+      fillOpacity: (value - min) / range * 0.5 + 0.5,
     };
   }
 

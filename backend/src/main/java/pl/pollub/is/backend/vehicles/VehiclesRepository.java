@@ -5,7 +5,6 @@ import org.springframework.data.jpa.repository.Query;
 import org.springframework.data.repository.query.Param;
 import pl.pollub.is.backend.vehicles.model.Vehicle;
 
-import java.util.Date;
 import java.util.List;
 
 public interface VehiclesRepository extends JpaRepository<Vehicle, Integer> {
@@ -28,4 +27,16 @@ public interface VehiclesRepository extends JpaRepository<Vehicle, Integer> {
             "GROUP BY area_code",
             nativeQuery = true)
     List<Object[]> countVehiclesByYear(@Param("year") int year);
+
+    @Query(value = "SELECT year(first_registration_date) as year, area_code, count(*) FROM `vehicles` " +
+            "WHERE first_registration_date IS NOT NULL AND year(first_registration_date) BETWEEN 1900 AND 2019 " +
+            "GROUP BY year(first_registration_date), area_code",
+            nativeQuery = true)
+    List<Object[]> countRegistrationsByAreaCodeAndAreaCode();
+
+    @Query(value = "SELECT year(deregistration_date) as year, area_code, count(*) FROM `vehicles` " +
+            "WHERE deregistration_date is not null AND year(deregistration_date) BETWEEN 1900 AND 2019 " +
+            "GROUP BY year(deregistration_date), area_code;",
+            nativeQuery = true)
+    List<Object[]> countDeregistrationsByAreaCodeAndAreaCode();
 }

@@ -1,14 +1,14 @@
 import style from "../Home.module.scss";
 import PolandMap from "./PolandMap.tsx";
-import { Row, Table } from "react-bootstrap";
-import { formatNumber } from "../../../util/utils.ts";
-import ChartStatusOverlay, { PropsWithApiData } from "./ChartStatusOverlay.tsx";
-import { useState } from "react";
-import useApi from "../../../hooks/useApi.ts";
+import {Row} from "react-bootstrap";
+import ChartStatusOverlay from "./ChartStatusOverlay.tsx";
+import {ChangeEvent, useState} from "react";
+import {useCumulativeData, useMergedData} from "../hooks/homeHooks.ts";
+import MainTable from "./MainTable.tsx";
 
-const INDICATORS = ["NO2", "NOx", "PM2.5", "Pb(PM10)", "SO2"];
-const YEARS = Array.from({ length: 24 }, (_, i) => 2000 + i);
-const VOIVODESHIPS = {
+export const INDICATORS = ["NO2", "NOx", "PM2.5", "Pb(PM10)", "SO2"];
+export const YEARS = Array.from({length: 20}, (_, i) => 2000 + i);
+export const VOIVODESHIPS = {
   "02": "dolnośląskie",
   "04": "kujawsko-pomorskie",
   "06": "lubelskie",
@@ -28,71 +28,26 @@ const VOIVODESHIPS = {
   XX: "nieokreślone",
 };
 
-export default function MapAndTable({ apiData }: PropsWithApiData) {
-  const [selectedIndicator, setSelectedIndicator] = useState<string | null>(
-    null
-  );
+export default function MapAndTable() {
+  const [selectedIndicator, setSelectedIndicator] = useState<string | null>("registrations");
   const [selectedYear, setSelectedYear] = useState<number | null>(null);
-  const [selectedVoivodeship, setSelectedVoivodeship] = useState<string>("");
+  const mergedData = useMergedData()
+  const cumulativeData = useCumulativeData();
 
-  //todo: wykresy
-  const airPollutionData = useApi(
-    selectedIndicator && selectedYear
-      ? `/air-pollution/counts/average-by-indicator-and-year?indicator=${selectedIndicator}&year=${selectedYear}`
-      : selectedYear
-      ? `/air-pollution/counts/average-by-year?year=${selectedYear}`
-      : "",
-    "get"
-  );
+  console.log(useCumulativeData())
+  const finalData = selectedYear ?
+    mergedData.data?.[selectedYear] :
+    cumulativeData.data ?
+      cumulativeData.data[Math.max(...Object.keys(cumulativeData.data).map(Number))] :
+      undefined;
 
-  const handleIndicatorChange = (
-    event: React.ChangeEvent<HTMLSelectElement>
-  ) => {
+  const handleIndicatorChange = (event: ChangeEvent<HTMLSelectElement>) => {
     setSelectedIndicator(event.target.value || null);
   };
 
-  const handleYearChange = (event: React.ChangeEvent<HTMLSelectElement>) => {
+  const handleYearChange = (event: ChangeEvent<HTMLSelectElement>) => {
     setSelectedYear(event.target.value ? Number(event.target.value) : null);
   };
-
-  const findAirPollution = (voivodeship: string, indicator: string) => {
-    if (!Array.isArray(airPollutionData.data)) {
-      return "N/A";
-    }
-    const newDataFormat = airPollutionData.data[0]?.length === 3;
-
-    if (newDataFormat) {
-      const data = airPollutionData.data.find(
-        ([name, ind]: [string, string, number]) =>
-          name === voivodeship && ind === indicator
-      );
-      return data ? data[2] : "N/A";
-    } else {
-      const data = airPollutionData.data.find(
-        ([name]: [string, number]) => name === voivodeship
-      );
-      return data ? data[1] : "N/A";
-    }
-  };
-
-  const pollutionData = apiData.data
-    ? (Object.keys(apiData.data) as Array<keyof typeof VOIVODESHIPS>).reduce(
-        (acc, key) => {
-          const voivodeshipName = VOIVODESHIPS[key];
-          acc[voivodeshipName] = {
-            name: voivodeshipName,
-            averagePollution: findAirPollution(
-              voivodeshipName,
-              selectedIndicator || ""
-            ),
-          };
-          return acc;
-        },
-        {} as Record<string, { name: string; averagePollution: number | "N/A" }>
-      )
-    : {};
-
-  console.log(pollutionData);
 
   return (
     <>
@@ -100,16 +55,17 @@ export default function MapAndTable({ apiData }: PropsWithApiData) {
         <div className="container mb-3">
           <div className="row align-items-center">
             <div className="col-auto text-end pe-3">
-              <p className="mb-0">Pierwiastek:</p>
+              <p className="mb-0">Wskaźnik:</p>
             </div>
             <div className="col-auto text-center">
               <div className="">
                 <select
-                  value={selectedIndicator || ""}
+                  value={selectedIndicator || "registrations"}
                   onChange={handleIndicatorChange}
                   className="form-select"
                 >
-                  <option value="">Wybierz pierwiastek</option>
+                  <option value="registrations">Zarejestrowane pojazdy</option>
+                  <option value="deregistrations">Wyrejestrowane pojazdy</option>
                   {INDICATORS.map((indicator) => (
                     <option key={indicator} value={indicator}>
                       {indicator}
@@ -141,99 +97,16 @@ export default function MapAndTable({ apiData }: PropsWithApiData) {
         </div>
       </Row>
       <Row>
-        <div
-          className={`text-center col-12 col-xxl-5 ${style.map} position-relative`}
-        >
-          <ChartStatusOverlay apiData={apiData} backgroundType={"none"} />
-          <PolandMap apiData={apiData} pollutionData={pollutionData} />
+        <div className={`text-center col-12 col-xxl-5 ${style.map} position-relative`}>
+          <ChartStatusOverlay apiData={mergedData} backgroundType={"none"}/>
+          <PolandMap
+            data={finalData}
+            selectedIndicator={selectedIndicator} />
         </div>
-        <div className={`col-12 col-xxl-7 ${style.table}`}>
-          <div className={style.scrollableTableWrapper}>
-            <Table bordered striped={apiData.data ? true : undefined}>
-              <thead>
-                <tr>
-                  <th>Województwo</th>
-                  <th>Liczba pojazdów</th>
-                  {selectedYear &&
-                    !selectedIndicator &&
-                    INDICATORS.map((indicator) => (
-                      <th key={indicator}>{indicator}</th>
-                    ))}
-                  {selectedIndicator && selectedYear && (
-                    <th>Średnie zanieczyszczenie {selectedIndicator}</th>
-                  )}
-                </tr>
-              </thead>
-              <tbody>
-                {apiData.data
-                  ? (
-                      Object.keys(apiData.data) as Array<
-                        keyof typeof VOIVODESHIPS
-                      >
-                    ).map((key) => {
-                      const voivodeshipName = VOIVODESHIPS[key];
-                      if (selectedYear && !selectedIndicator) {
-                        return (
-                          <tr key={key}>
-                            <td>{voivodeshipName}</td>
-                            <td>{formatNumber(apiData.data[key])}</td>
-                            {INDICATORS.map((indicator) => (
-                              <td key={indicator}>
-                                {findAirPollution(voivodeshipName, indicator)}
-                              </td>
-                            ))}
-                          </tr>
-                        );
-                      } else if (selectedIndicator && selectedYear) {
-                        return (
-                          <tr key={key}>
-                            <td>{voivodeshipName}</td>
-                            <td>{formatNumber(apiData.data[key])}</td>
-                            <td>
-                              {findAirPollution(
-                                voivodeshipName,
-                                selectedIndicator
-                              )}
-                            </td>
-                          </tr>
-                        );
-                      } else {
-                        return null;
-                      }
-                    })
-                  : Array.from({ length: 10 }, (_, i) => (
-                      <LoadingRow key={i} i={i} />
-                    ))}
-              </tbody>
-            </Table>
-          </div>
-        </div>
+        <MainTable
+          data={finalData}
+          selectedIndicator={selectedIndicator}/>
       </Row>
     </>
-  );
-}
-
-function LoadingRow({ i }: { i: number }) {
-  return (
-    <tr>
-      <td
-        className={style.loadingRow}
-        style={{ animationDelay: `${i * 0.1}s` }}
-      >
-        ...
-      </td>
-      <td
-        className={style.loadingRow}
-        style={{ animationDelay: `${i * 0.1 + 0.1}s` }}
-      >
-        ...
-      </td>
-      <td
-        className={style.loadingRow}
-        style={{ animationDelay: `${i * 0.1 + 0.2}s` }}
-      >
-        ...
-      </td>
-    </tr>
   );
 }
