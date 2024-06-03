@@ -42,7 +42,7 @@ export default function MainTable({data: finalData, selectedIndicator}: TablePro
                   ))}
                 </tr>
               ))
-            : Array.from({length: 10}, (_, i) => (
+            : Array.from({length: 16}, (_, i) => (
               <LoadingRow key={i} i={i}/>
             ))}
           </tbody>

@@ -26,8 +26,8 @@ export interface VoivodeshipData {
   deregistrations?: number;
   NO2?: number;
   NOx?: number;
-  PM2_5?: number;
-  Pb_PM10?: number;
+  "PM2.5"?: number;
+  "Pb(PM10)"?: number;
   SO2?: number;
 }
 

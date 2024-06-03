@@ -2,23 +2,22 @@ import {CSSProperties, useMemo} from "react";
 import {VoivodeshipData, YearData} from "../hooks/HomeDataContext.tsx";
 
 export const VOIVODESHIPS = [
-  "DOLNOŚLĄSKIE",
-  "KUJAWSKO-POMORSKIE",
-  "LUBELSKIE",
-  "LUBUSKIE",
-  "ŁÓDZKIE",
-  "MAŁOPOLSKIE",
-  "MAZOWIECKIE",
-  "OPOLSKIE",
-  "PODKARPACKIE",
-  "PODLASKIE",
-  "POMORSKIE",
-  "ŚLĄSKIE",
-  "ŚWIĘTOKRZYSKIE",
-  "WARMIŃSKO-MAZURSKIE",
-  "WIELKOPOLSKIE",
-  "ZACHODNIOPOMORSKIE",
-  "NIEOKREŚLONE",
+  "dolnośląskie",
+  "kujawsko-pomorskie",
+  "lubelskie",
+  "lubuskie",
+  "łódzkie",
+  "małopolskie",
+  "mazowieckie",
+  "opolskie",
+  "podkarpackie",
+  "podlaskie",
+  "pomorskie",
+  "śląskie",
+  "świętokrzyskie",
+  "warmińsko-mazurskie",
+  "wielkopolskie",
+  "zachodniopomorskie"
 ];
 
 interface PolandMapProps {

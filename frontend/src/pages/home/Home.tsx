@@ -24,6 +24,7 @@ import {
 import VehiclesBarChart from "./components/VehiclesBarChart.tsx";
 import MapAndTable from "./components/MapAndTable.tsx";
 import {HomeDataContextProvider} from "./hooks/HomeDataContext.tsx";
+import MainLineChart from "./components/MainLineChart.tsx";
 
 // todo its just an sample data for charts, remove it
 const SAMPLE_DATA = Array.from({length: 16}, (_, i) => ({
@@ -42,6 +43,7 @@ export default function Home() {
       <HomeDataContextProvider>
         <Container className={"mt-5 col-12 col-xxl-8 mx-auto mb-5"}>
           <MapAndTable />
+          <MainLineChart />
           <Row className={"mt-5"}>
             <VehiclesBarChart apiData={vehiclesByAreaCode}/>
             <div className={"col-12 col-xl-6"}>
