@@ -3,7 +3,7 @@ import {ApiData} from "../../../hooks/useApi.ts";
 import {MergedData} from "./HomeDataContext.tsx";
 
 export default function getMergedData(registrationsData: ApiData, deregistrationsData: ApiData, airPollutionData: ApiData): ApiData<MergedData> {
-  if (!registrationsData.loaded || !deregistrationsData.loaded || !airPollutionData.loaded) {
+  if (!registrationsData.data || !deregistrationsData.data || !airPollutionData.data) {
     return {
       data: null,
       loaded: false,

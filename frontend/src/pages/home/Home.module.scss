@@ -44,6 +44,7 @@
 }
 
 .map {
+  height: fit-content;
   @media screen and (max-width: 1480px) {
     flex: 0 0 auto;
     width: 100%;
