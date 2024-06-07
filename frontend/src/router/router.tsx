@@ -6,6 +6,7 @@ import Register from "../pages/login/Register.tsx";
 import CepikApiImport from "../pages/import/cepik/CepikApiImport.tsx";
 import CepikFileImport from "../pages/import/cepik/CepikFileImport.tsx";
 import PollutionFileImport from "../pages/import/pollution/PollutionFileImport.tsx";
+import Legend from "../pages/home/Legend.tsx";
 
 const router = createBrowserRouter([
   {
@@ -40,6 +41,10 @@ const router = createBrowserRouter([
         element: <PollutionFileImport />
       }
     ]
+  },
+  {
+    path: "/legenda",
+    element: <Legend />
   }
 ])
 

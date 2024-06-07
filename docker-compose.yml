@@ -10,7 +10,7 @@ services:
     ports:
       - "3369:3306"
     volumes:
-      - database:/var/lib/mysql
+      - IS_database:/var/lib/mysql
   phpmyadmin:
     image: phpmyadmin
     container_name: IS_phpmyadmin
@@ -23,4 +23,4 @@ services:
       - database
 
 volumes:
-  database:
+  IS_database:

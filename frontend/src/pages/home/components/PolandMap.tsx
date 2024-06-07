@@ -95,8 +95,8 @@ interface PolandMapProps {
   setHoveredVoivodeship: (voivodeship: string | null) => void;
 }
 
-const BASE_COLOR = "#94add6"
-const HOVER_COLOR = "#1b3661"
+const BASE_COLOR = "#177AE3"
+const HOVER_COLOR = "#1639E0"
 
 export default function PolandMap({
                                     selectedIndicator,
@@ -130,7 +130,7 @@ export default function PolandMap({
       };
     return {
       fill: hoveredVoivodeship === voivodeship ? HOVER_COLOR : BASE_COLOR,
-      fillOpacity: (value - min) / range * 0.5 + 0.5,
+      fillOpacity: hoveredVoivodeship === voivodeship ? 1 : (value - min) / range * 0.7 + 0.3,
     };
   }
 

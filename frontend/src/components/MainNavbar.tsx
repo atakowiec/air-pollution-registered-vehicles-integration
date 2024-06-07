@@ -30,6 +30,7 @@ export function MainNavbar() {
                 Zanieczyszczenie powietrza z pliku XLSX
               </NavDropdown.Item>
             </NavDropdown>
+            <Nav.Link as={NavLink} to="/legenda">Legenda</Nav.Link>
             {
               user.isLogged ?
                 <>
