@@ -17,6 +17,7 @@ public class VehiclesService {
     private final static String VEHICLES_BY_AREA_CODE_KEY = "VEHICLES_BY_AREA_CODE";
     private final static String REGISTRATIONS_BY_YEAR_AND_VOIVODESHIP_KEY = "REGISTRATIONS_BY_YEAR_AND_VOIVODESHIP";
     private final static String DEREGISTRATIONS_BY_YEAR_AND_VOIVODESHIP_KEY = "DEREGISTRATIONS_BY_YEAR_AND_VOIVODESHIP";
+    private final static String DEREGISTRATIONS_BY_AREA_CODE_KEY = "DEREGISTRATIONS_BY_AREA_CODE";
 
     private final VehiclesRepository vehiclesRepository;
     private final DatabaseCacheService cacheService;
@@ -32,10 +33,22 @@ public class VehiclesService {
         cacheService.registerSupplier(VEHICLES_BY_AREA_CODE_KEY, CacheDependency.VEHICLES_DATA, this::fetchVehiclesCountByAreaCode);
         cacheService.registerSupplier(REGISTRATIONS_BY_YEAR_AND_VOIVODESHIP_KEY, CacheDependency.VEHICLES_DATA, this::fetchRegistrationsByAreaCodeAndVoivodeships);
         cacheService.registerSupplier(DEREGISTRATIONS_BY_YEAR_AND_VOIVODESHIP_KEY, CacheDependency.VEHICLES_DATA, this::fetchDeregistrationsByAreaCodeAndVoivodeships);
+        cacheService.registerSupplier(DEREGISTRATIONS_BY_AREA_CODE_KEY, CacheDependency.VEHICLES_DATA, this::fetchDeregistrationsByAreaCode);
     }
 
     private String fetchVehiclesCountByAreaCode() {
         List<Object[]> dbResult = vehiclesRepository.countVehiclesByAreaCode();
+        SimpleJsonBuilder result = SimpleJsonBuilder.empty();
+
+        for (Object[] objects : dbResult) {
+            result.add(objects[0].toString(), objects[1]);
+        }
+
+        return result.toJson();
+    }
+
+    private String fetchDeregistrationsByAreaCode() {
+        List<Object[]> dbResult = vehiclesRepository.countDeregistrationsByAreaCode();
         SimpleJsonBuilder result = SimpleJsonBuilder.empty();
 
         for (Object[] objects : dbResult) {
@@ -55,6 +68,10 @@ public class VehiclesService {
 
     public String getDeregistrationsByAreaCodeAndVoivodeships() {
         return cacheService.getValue(DEREGISTRATIONS_BY_YEAR_AND_VOIVODESHIP_KEY);
+    }
+
+    public String getDeregistrationsByAreaCode() {
+        return cacheService.getValue(DEREGISTRATIONS_BY_AREA_CODE_KEY);
     }
 
     public List<Vehicle> getVehiclesByAreaCodeAndRegistrationYear(String areaCode, int year) {

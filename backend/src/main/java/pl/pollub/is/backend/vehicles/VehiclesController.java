@@ -53,4 +53,11 @@ public class VehiclesController {
                 .contentType(MediaType.APPLICATION_JSON)
                 .body(vehiclesService.getDeregistrationsByAreaCodeAndVoivodeships());
     }
+
+    @GetMapping("/counts/deregistrations-by-area-code")
+    public Object getDeregistrationsByAreaCode() {
+        return ResponseEntity.ok()
+                .contentType(MediaType.APPLICATION_JSON)
+                .body(vehiclesService.getDeregistrationsByAreaCode());
+    }
 }

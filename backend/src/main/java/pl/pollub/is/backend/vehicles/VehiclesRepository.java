@@ -39,4 +39,7 @@ public interface VehiclesRepository extends JpaRepository<Vehicle, Integer> {
             "GROUP BY year(deregistration_date), area_code;",
             nativeQuery = true)
     List<Object[]> countDeregistrationsByAreaCodeAndAreaCode();
+
+    @Query(value = "SELECT v.areaCode, COUNT(*) FROM Vehicle v WHERE v.deregistrationDate IS NOT NULL GROUP BY v.areaCode")
+    List<Object[]> countDeregistrationsByAreaCode();
 }
