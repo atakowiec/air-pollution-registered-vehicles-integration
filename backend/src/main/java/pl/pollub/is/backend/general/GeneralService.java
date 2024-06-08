@@ -4,17 +4,24 @@ import com.fasterxml.jackson.core.JsonProcessingException;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import jakarta.annotation.PostConstruct;
 import lombok.RequiredArgsConstructor;
+import org.apache.commons.csv.CSVFormat;
+import org.apache.commons.csv.CSVPrinter;
 import org.springframework.stereotype.Service;
 import pl.pollub.is.backend.cache.DatabaseCacheService;
 import pl.pollub.is.backend.cache.supplier.CacheDependency;
+import pl.pollub.is.backend.exception.HttpException;
 import pl.pollub.is.backend.pollution.AirPollutionRepository;
 import pl.pollub.is.backend.util.SimpleJsonBuilder;
 import pl.pollub.is.backend.vehicles.VehiclesRepository;
 
 import java.io.ByteArrayOutputStream;
+import java.io.IOException;
+import java.io.OutputStreamWriter;
+import java.nio.charset.StandardCharsets;
 import java.time.ZoneOffset;
 import java.time.ZonedDateTime;
 import java.time.format.DateTimeFormatter;
+import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
@@ -22,8 +29,9 @@ import java.util.Map;
 @Service
 @RequiredArgsConstructor
 public class GeneralService {
-    private final ObjectMapper objectMapper = new ObjectMapper();
     private final static String BY_YEAR_AND_VOIVODESHIPS_KEY = "MERGED_DATA_BY_YEAR_AND_VOIVODESHIPS";
+    private final static String[] INDICATORS = {"registrations", "deregistrations", "SO2", "NO2", "PM2.5", "Pb(PM10)", "NOx"};
+    private final ObjectMapper objectMapper = new ObjectMapper();
 
     private final DatabaseCacheService cacheService;
     private final VehiclesRepository vehiclesRepository;
@@ -80,12 +88,12 @@ public class GeneralService {
     }
 
     public Map<String, Map<String, Map<String, Number>>> prepareData(int startYear, int endYear, String voivodeships, String indicators) {
-        Map<String, Map<String, Map<String, Number>>> data = null;
+        Map<String, Map<String, Map<String, Number>>> data;
         try {
             //noinspection unchecked
             data = objectMapper.readValue(getDataByYearAndVoivodeships(), Map.class);
         } catch (JsonProcessingException e) {
-            return new HashMap<>();
+            throw new HttpException(500, "Internal server error while parsing data.");
         }
 
         if (startYear != -1 || endYear != -1) {
@@ -109,7 +117,7 @@ public class GeneralService {
         }
 
         // remove voivodeships with no data
-        data.forEach((year, voivodeshipData) -> voivodeshipData.entrySet().removeIf(entry -> entry.getValue().isEmpty()));
+        data.forEach((_, voivodeshipData) -> voivodeshipData.entrySet().removeIf(entry -> entry.getValue().isEmpty()));
 
         // remove years with no data
         data.entrySet().removeIf(entry -> entry.getValue().isEmpty());
@@ -125,8 +133,8 @@ public class GeneralService {
         metadataBuilder.add("exported_at", ZonedDateTime.now(ZoneOffset.UTC).format(DateTimeFormatter.ISO_INSTANT));
         metadataBuilder.add("title", "Data grouped by year and voivodeships");
         metadataBuilder.add("description", "Data about vehicle registrations, deregistrations and air pollution by year and voivodeship. Air pollution data is presented as average values of each indicator.");
-        if(startYear != -1) metadataBuilder.add("start_year", startYear);
-        if(endYear != -1) metadataBuilder.add("end_year", endYear);
+        if (startYear != -1) metadataBuilder.add("start_year", startYear);
+        if (endYear != -1) metadataBuilder.add("end_year", endYear);
         metadataBuilder.add("selected_voivodeships", voivodeships.split(","));
         metadataBuilder.add("selected_indicators", indicators.split(","));
 
@@ -138,14 +146,50 @@ public class GeneralService {
         try {
             byteArrayOutputStream.write(jsonBuilder.toJson().getBytes());
         } catch (Exception e) {
-            throw new RuntimeException(e);
+            throw new HttpException(500, "Internal server error while exporting data.");
         }
 
         return byteArrayOutputStream;
     }
 
     public ByteArrayOutputStream exportDataAsCsv(int startYear, int endYear, String voivodeships, String indicators) {
-        return null; // todo
+        Map<String, Map<String, Map<String, Number>>> data = prepareData(startYear, endYear, voivodeships, indicators);
+
+        ByteArrayOutputStream byteArrayOutputStream = new ByteArrayOutputStream();
+        String[] selectedIndicators = indicators.equals("*") ? INDICATORS : indicators.split(",");
+
+        String[] headers = new String[selectedIndicators.length + 2];
+        headers[0] = "year";
+        headers[1] = "voivodeship";
+        System.arraycopy(selectedIndicators, 0, headers, 2, selectedIndicators.length);
+
+        CSVFormat format = CSVFormat.DEFAULT.builder().setHeader(headers).build();
+
+        try (CSVPrinter csvPrinter = new CSVPrinter(new OutputStreamWriter(byteArrayOutputStream, StandardCharsets.UTF_8), format)) {
+            List<String> keys = data.keySet().stream().sorted().toList();
+
+            for (String year: keys) {
+                Map<String, Map<String, Number>> value = data.get(year);
+
+                for (Map.Entry<String, Map<String, Number>> voivodeshipEntry : value.entrySet()) {
+                    String voivodeship = voivodeshipEntry.getKey();
+                    List<String> rowValues = new ArrayList<>();
+                    rowValues.add(year);
+                    rowValues.add(voivodeship);
+
+                    for (String indicator : selectedIndicators) {
+                        Number indicatorValue = voivodeshipEntry.getValue().get(indicator);
+                        rowValues.add(indicatorValue == null ? "" : indicatorValue.toString());
+                    }
+
+                    csvPrinter.printRecord(rowValues);
+                }
+            }
+        } catch (IOException e) {
+            throw new HttpException(500, "Internal server error while exporting data.");
+        }
+
+        return byteArrayOutputStream;
     }
 
     public ByteArrayOutputStream exportDataAsXml(int startYear, int endYear, String voivodeships, String indicators) {
