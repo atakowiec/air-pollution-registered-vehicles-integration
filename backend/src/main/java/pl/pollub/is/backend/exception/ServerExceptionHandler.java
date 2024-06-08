@@ -6,10 +6,10 @@ import org.springframework.web.bind.annotation.ExceptionHandler;
 import org.springframework.web.bind.annotation.RestControllerAdvice;
 
 @RestControllerAdvice
-@Order(1)
-public class HttpExceptionHandler {
-    @ExceptionHandler(HttpException.class)
-    public ResponseEntity<String> handleHttpException(HttpException ex) {
-        return ex.toResponseEntity();
+@Order()
+public class ServerExceptionHandler {
+    @ExceptionHandler(Exception.class)
+    public ResponseEntity<String> handleHttpException(Exception ex) {
+        return new HttpException(500, ex.getMessage()).toResponseEntity();
     }
 }
