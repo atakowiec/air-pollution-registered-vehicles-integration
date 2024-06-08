@@ -59,7 +59,7 @@ export default function MapAndTable() {
       <div className={"d-flex mb-3 justify-content-between flex-wrap"}>
         <Row className="align-items-center">
           <div className="col-3 col-md-auto text-end pe-3 mb-3 mb-md-0">
-            <p className="mb-0">Wskaźnik:</p>
+            <p className="mb-0">Wyświetlana wartość:</p>
           </div>
           <div className="col-9 col-md-auto text-center mb-3 mb-md-0">
             <div className="">
@@ -88,7 +88,7 @@ export default function MapAndTable() {
                 onChange={handleYearChange}
                 className="form-select"
               >
-                <option value="">Wybierz rok</option>
+                <option value="">Łączne dane</option>
                 {YEARS.map((year) => (
                   <option key={year} value={year}>
                     {year}

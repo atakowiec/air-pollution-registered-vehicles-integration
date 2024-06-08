@@ -3,14 +3,10 @@ import {Form} from "react-bootstrap";
 import {ChangeEvent, useState} from "react";
 import {getApi} from "../../../axios/axios.ts";
 import {MainNavbar} from "../../../components/MainNavbar.tsx";
-
-interface ImportResponse {
-  [key: string]: number
-}
+import PollutionImportProgressInfo from "./PollutionImportProgressInfo.tsx";
 
 export default function PollutionFileImport() {
   const [selectedFile, setSelectedFile] = useState<File | null>(null)
-  const [result, setResult] = useState<ImportResponse>({})
   const [status, setStatus] = useState("")
 
   const onFileChange = (event: ChangeEvent<HTMLInputElement>) => {
@@ -28,19 +24,14 @@ export default function PollutionFileImport() {
       selectedFile,
       selectedFile.name
     )
-
-    setResult({})
-    setStatus("Trwa importowanie danych... To może potrwać kilka minut")
+    setStatus("")
     getApi().post("/pollution/import", formData, {
       headers: {
         "Content-Type": "multipart/form-data"
       },
-    }).then((data) => {
-      setResult(data.data)
     }).catch(() => {
       setStatus("Wystąpił błąd podczas importu danych")
     }).finally(() => {
-      setStatus("")
     })
   }
 
@@ -55,16 +46,8 @@ export default function PollutionFileImport() {
           <button className={"btn btn-primary mt-3"} type={"button"} onClick={onFileUpload}>Prześlij</button>
         </Form>
         {status && <p className={"mt-3"}>{status}</p>}
-
-        {Object.keys(result).length > 0 && (
-          <div className={"mt-3"}>
-            <h5>Wynik importu:</h5>
-            {Object.entries(result).map(([key, value]) => (
-              <div key={key}><b>{key}</b>: {value} wyników</div>
-            ))}
-          </div>
-        )}
       </Container>
+      <PollutionImportProgressInfo />
     </>
   )
 }

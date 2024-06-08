@@ -1,3 +1,5 @@
+import {ProgressStatus} from "../hooks/useProgress.ts";
+
 export function formatDate(date?: number) {
   return date ? new Date(date).toLocaleString() : undefined
 }
@@ -24,4 +26,17 @@ export function isEmpty(value: any) {
     return Object.keys(value).length == 0
 
   return false;
+}
+
+export function translateImportStatus(status: ProgressStatus) {
+  switch (status) {
+    case "NOT_STARTED":
+      return "Nie rozpoczęto"
+    case "IN_PROGRESS":
+      return "W trakcie"
+    case "FINISHED":
+      return "Zakończono"
+    case "FAILED":
+      return "Niepowodzenie"
+  }
 }

@@ -1,6 +1,6 @@
 import {ProgressData, ProgressStatus} from "../../../../hooks/useProgress.ts";
 import {useMemo} from "react";
-import {formatDate, formatDuration, formatNumber, round} from "../../../../util/utils.ts";
+import {formatDate, formatDuration, formatNumber, round, translateImportStatus} from "../../../../util/utils.ts";
 import Container from "react-bootstrap/Container";
 import {ProgressBar} from "react-bootstrap";
 import ImportErrors from "./ImportErrors.tsx";
@@ -42,19 +42,6 @@ interface CalculatedData {
   saveProgress?: number;
   readApproxTime?: string;
   saveApproxTime?: string;
-}
-
-function translateStatus(status: ProgressStatus) {
-  switch (status) {
-    case "NOT_STARTED":
-      return "Nie rozpoczęto"
-    case "IN_PROGRESS":
-      return "W trakcie"
-    case "FINISHED":
-      return "Zakończono"
-    case "FAILED":
-      return "Niepowodzenie"
-  }
 }
 
 export default function ImportProgressInfo({progress}: ImportProgressInfoProps) {
@@ -99,7 +86,7 @@ export default function ImportProgressInfo({progress}: ImportProgressInfoProps) 
       <Container className={"text-center px-0 mt-2 col-12 col-md-8 col-xl-6 col-xxl-5 gap-5 mb-5 pb-5"}>
         <Container className={"bg-light rounded p-2 mb-2"}>
           <h3>Postęp importu</h3>
-          <h5>Status: {translateStatus(calculatedData.status)}</h5>
+          <h5>Status: {translateImportStatus(calculatedData.status)}</h5>
           <p className={"mt-4"}>
             Rozpoczęto: {calculatedData.startTime ?? "-"}<br/>
             Zakończono: {calculatedData.endTime ?? "-"}<br/>

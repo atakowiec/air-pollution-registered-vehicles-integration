@@ -1,11 +1,22 @@
 package pl.pollub.is.backend.pollution;
 
-import lombok.RequiredArgsConstructor;
-import org.dhatim.fastexcel.reader.*;
+import jakarta.persistence.EntityManager;
+import jakarta.persistence.EntityManagerFactory;
+import org.dhatim.fastexcel.reader.Cell;
+import org.dhatim.fastexcel.reader.ReadableWorkbook;
+import org.dhatim.fastexcel.reader.Row;
+import org.dhatim.fastexcel.reader.Sheet;
+import org.springframework.http.HttpStatus;
+import org.springframework.http.ResponseEntity;
+import org.springframework.scheduling.concurrent.ThreadPoolTaskExecutor;
 import org.springframework.stereotype.Service;
 import org.springframework.web.multipart.MultipartFile;
 import pl.pollub.is.backend.cache.DatabaseCacheService;
 import pl.pollub.is.backend.cache.supplier.CacheDependency;
+import pl.pollub.is.backend.exception.HttpException;
+import pl.pollub.is.backend.pollution.progress.PollutionImportProgress;
+import pl.pollub.is.backend.progress.ProgressService;
+import pl.pollub.is.backend.progress.model.ProgressStatus;
 
 import java.io.IOException;
 import java.util.ArrayList;
@@ -15,25 +26,70 @@ import java.util.Map;
 import java.util.stream.Stream;
 
 @Service
-@RequiredArgsConstructor
 public class AirPollutionService {
     private final static List<String> ALLOWED_INDICATORS = List.of("SO2", "NO2", "PM2,5", "Pb(PM10)", "NOx");
     private final static List<String> COLUMN_NAMES = List.of("Rok", "Województwo", "Kod strefy", "Kod stacji", "Wskaźnik", "Czas uśredniania", "Średnia", "Liczba pomiarów");
 
     private final AirPollutionRepository airPollutionRepository;
     private final DatabaseCacheService cacheService;
+    private final PollutionImportProgress progress = new PollutionImportProgress();
+    private final EntityManagerFactory entityManagerFactory;
+    private final ThreadPoolTaskExecutor asyncExecutor;
 
-    public Map<String, Integer> handleFileUpload(MultipartFile multipartFile) throws IOException {
-        Map<String, Integer> savedIndicators = new HashMap<>();
-
-        try (ReadableWorkbook wb = new ReadableWorkbook(multipartFile.getInputStream())) {
-            wb.getSheets().forEach(sheet -> processSheet(sheet, savedIndicators));
-        }
-
-        return savedIndicators;
+    public AirPollutionService(AirPollutionRepository airPollutionRepository,
+                               DatabaseCacheService cacheService,
+                               ProgressService progressService,
+                               EntityManagerFactory entityManagerFactory,
+                               ThreadPoolTaskExecutor asyncExecutor) {
+        this.airPollutionRepository = airPollutionRepository;
+        this.cacheService = cacheService;
+        this.entityManagerFactory = entityManagerFactory;
+        this.asyncExecutor = asyncExecutor;
+        progressService.registerProgress(progress);
     }
 
-    private void processSheet(Sheet sheet, Map<String, Integer> savedIndicators) {
+    public ResponseEntity<String> handleFileUpload(MultipartFile multipartFile) {
+        if (progress.getStatus() == ProgressStatus.IN_PROGRESS)
+            throw new HttpException(HttpStatus.CONFLICT, "Operation already in progress");
+
+        progress.clear();
+
+        // start processing file in background
+        asyncExecutor.execute(() -> {
+            progress.setStartDate();
+            try (ReadableWorkbook wb = new ReadableWorkbook(multipartFile.getInputStream())) {
+                progress.setDataLoaded(true);
+
+                // first count rows in all sheets
+                wb.getSheets().forEach(this::preprocessSheet);
+                wb.getSheets().forEach(this::processSheet);
+
+                progress.setEndDate();
+                progress.setStatus(ProgressStatus.FINISHED);
+            } catch (IOException e) {
+                progress.setStatus(ProgressStatus.FAILED);
+                progress.setEndDate();
+                throw new HttpException(500, "Error while reading excel file");
+            }
+        });
+
+        return progress.toResponseEntity();
+    }
+
+    private void preprocessSheet(Sheet sheet) {
+        if (!ALLOWED_INDICATORS.contains(sheet.getName()))
+            return;
+
+        try (Stream<Row> rowStream = sheet.openStream()) {
+            long count = rowStream.count() - 1;
+            progress.setIndicatorTotal(sheet.getName(), count);
+            progress.setTotal(progress.getTotal() + count);
+        } catch (IOException e) {
+            throw new HttpException(500, "Error while reading excel file");
+        }
+    }
+
+    private void processSheet(Sheet sheet) {
         if (!ALLOWED_INDICATORS.contains(sheet.getName()))
             return;
 
@@ -55,6 +111,8 @@ public class AirPollutionService {
                     return;
                 }
 
+                progress.addRead(1);
+                progress.addIndicatorRead(sheet.getName(), 1);
                 // process data but only when column with year is present and the value in row is numeric
                 String year = getCellValue(row, columnIndexes.get("Rok"), String.class);
                 if (year == null || !year.matches("\\d+"))
@@ -83,15 +141,30 @@ public class AirPollutionService {
 
                 // save airPollution to database
                 toSave.add(airPollution);
-
-                // save indicator to savedIndicators map
-                savedIndicators.merge(airPollution.getIndicator(), 1, Integer::sum);
             });
 
-            airPollutionRepository.saveAll(toSave);
+            progress.setIndicatorReadDate(sheet.getName());
+
+            EntityManager entityManager = entityManagerFactory.createEntityManager();
+            entityManager.getTransaction().begin();
+
+            for (AirPollution airPollution : toSave) {
+                entityManager.persist(airPollution);
+                progress.addSaved(1);
+                progress.addIndicatorSaved(sheet.getName(), 1);
+            }
+            entityManager.getTransaction().commit();
+            entityManager.clear();
+            entityManager.close();
+
+            progress.setIndicatorSavedDate(sheet.getName());
+
+            if (progress.getRead() == progress.getTotal())
+                progress.setReadDate();
+
             cacheService.onDependencyChange(CacheDependency.POLLUTION_DATA);
         } catch (IOException e) {
-            throw new RuntimeException(e);
+            throw new HttpException(500, "Error while reading excel file");
         }
     }
 
