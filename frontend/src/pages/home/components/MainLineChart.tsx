@@ -50,8 +50,9 @@ export default function MainLineChart() {
 
       const newYearData = {
         year: Number(year),
-        vehicles: cumulativeVoivodeshipData.registrations && cumulativeVoivodeshipData.deregistrations ?
-          round((cumulativeVoivodeshipData.registrations - cumulativeVoivodeshipData.deregistrations) / 100_000) : lastYearData.vehicles,
+        vehicles: cumulativeVoivodeshipData.registrations ?
+          Math.max(0, round((cumulativeVoivodeshipData.registrations - (cumulativeVoivodeshipData.deregistrations ?? 0)) / 100_000)) :
+          lastYearData.vehicles,
         NO2: voivodeshipData.NO2 ? round(voivodeshipData.NO2) : lastYearData.NO2,
         NOx: voivodeshipData.NOx ? round(voivodeshipData.NOx) : lastYearData.NOx,
         PM2_5: voivodeshipData["PM2.5"] ? round(voivodeshipData["PM2.5"]) : lastYearData.PM2_5,

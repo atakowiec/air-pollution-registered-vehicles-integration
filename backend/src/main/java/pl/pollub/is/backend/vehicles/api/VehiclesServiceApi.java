@@ -89,7 +89,7 @@ public class VehiclesServiceApi {
 
         String id = getValueOrNull(dataNode, "id");
         vehicle.setVehicleId(id != null ? new BigInteger(id) : null);
-        vehicle.setAreaCode(getValueOrNull(attributesNode, "wojewodztwo-kod"));
+        vehicle.setAreaCode(getValueOrNull(attributesNode, "rejestracja-wojewodztwo"));
         vehicle.setCountyCode(getValueOrNull(attributesNode, "rejestracja-powiat"));
         vehicle.setBrand(getValueOrNull(attributesNode, "marka"));
         vehicle.setModel(getValueOrNull(attributesNode, "model"));

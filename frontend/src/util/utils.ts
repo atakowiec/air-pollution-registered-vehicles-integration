@@ -3,24 +3,24 @@ export function formatDate(date?: number) {
 }
 
 export function round(value: number) {
-  return Math.round(value * 100) / 100
+  return value > 1 ? Math.round(value * 1000) / 1000 : parseFloat(value.toPrecision(3))
 }
 
 export function formatDuration(duration: number) {
-  if(duration <= 0) return "00:00:00"
+  if (duration <= 0) return "00:00:00"
   return new Date(duration).toISOString().slice(11, 19)
 }
 
 export function formatNumber(number: number) {
-  if(isNaN(number)) return "-"
+  if (isNaN(number)) return "-"
 
   return new Intl.NumberFormat().format(number)
 }
 
 export function isEmpty(value: any) {
-  if(Array.isArray(value)) return value.length === 0
+  if (Array.isArray(value)) return value.length === 0
 
-  if(typeof value === "object" && value !== null)
+  if (typeof value === "object" && value !== null)
     return Object.keys(value).length == 0
 
   return false;

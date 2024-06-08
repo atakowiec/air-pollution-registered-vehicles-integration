@@ -30,10 +30,19 @@
   th {
     white-space: nowrap;
     cursor: pointer;
+    align-items: center;
     text-align: center;
+    vertical-align: middle;
+    line-height: 1;
 
     &:hover {
       background-color: #f0f0f0;
+    }
+
+    .tableUnits {
+      font-size: 0.8rem;
+      font-weight: 400;
+      color: #999;
     }
   }
 }

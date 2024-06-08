@@ -112,8 +112,18 @@ export default function MainTable({
             </th>
             {INDICATORS.map((indicator) => (
               <th key={indicator} onClick={() => onHeaderClick(indicator as SortColumn)}>
-                {indicator}
-                {getSortIcon(indicator as SortColumn)}
+                <div className={"d-flex align-items-center"}>
+                  <div className={"pe-1"}>
+                    {indicator}
+                    <br/>
+                    <span className={style.tableUnits}>
+                      [µg/m<sup>3</sup>]
+                    </span>
+                  </div>
+                  <div>
+                    {getSortIcon(indicator as SortColumn)}
+                  </div>
+                </div>
               </th>
             ))}
           </tr>
