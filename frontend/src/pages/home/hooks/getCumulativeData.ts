@@ -1,9 +1,7 @@
 import {ApiData} from "../../../hooks/useApi.ts";
 import {MergedData, VoivodeshipData} from "./HomeDataContext.tsx";
-import getMergedData from "./getMergedData.ts";
 
-export default function getCumulativeData(registrationsData: ApiData, deregistrationsData: ApiData, airPollutionData: ApiData): ApiData<MergedData> {
-  const mergedData = getMergedData(registrationsData, deregistrationsData, airPollutionData);
+export default function getCumulativeData(mergedData: ApiData<MergedData>): ApiData<MergedData> {
   if (!mergedData.loaded || !mergedData.data) {
     return {
       data: null,

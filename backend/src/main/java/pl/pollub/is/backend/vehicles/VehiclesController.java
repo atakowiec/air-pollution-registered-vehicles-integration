@@ -40,14 +40,14 @@ public class VehiclesController {
         return ResponseEntity.ok(vehiclesCountByYear);
     }
 
-    @GetMapping("/counts/registrations-by-area-code-and-voivodeships")
+    @GetMapping("/counts/registrations-by-year-and-voivodeships")
     public Object getRegistrationsByAreaCodeAndVoivodeships() {
         return ResponseEntity.ok()
                 .contentType(MediaType.APPLICATION_JSON)
                 .body(vehiclesService.getRegistrationsByAreaCodeAndVoivodeships());
     }
 
-    @GetMapping("/counts/deregistrations-by-area-code-and-voivodeships")
+    @GetMapping("/counts/deregistrations-by-year-and-voivodeships")
     public Object getDeregistrationsByAreaCodeAndVoivodeships() {
         return ResponseEntity.ok()
                 .contentType(MediaType.APPLICATION_JSON)

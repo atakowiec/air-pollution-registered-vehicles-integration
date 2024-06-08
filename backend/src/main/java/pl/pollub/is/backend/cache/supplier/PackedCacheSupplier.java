@@ -6,5 +6,5 @@ import lombok.Data;
 public class PackedCacheSupplier {
     private final String key;
     private final CacheSupplier cacheSupplier;
-    private final CacheDependency cacheDependency;
+    private final CacheDependency[] cacheDependencies;
 }

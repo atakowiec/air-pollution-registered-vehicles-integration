@@ -7,14 +7,22 @@ import java.util.HashMap;
 import java.util.Map;
 
 public class SimpleJsonBuilder {
-    private final Map<String, Object> json = new HashMap<>();
+    private final Map<String, Object> json;
 
     private SimpleJsonBuilder() {
-        // empty
+        this.json = new HashMap<>();
+    }
+
+    private SimpleJsonBuilder(Map<String, ?> map) {
+        this.json = new HashMap<>(map);
     }
 
     public static SimpleJsonBuilder of(String key, Object value) {
         return new SimpleJsonBuilder().add(key, value);
+    }
+
+    public static SimpleJsonBuilder of(Map<String, ?> map) {
+        return new SimpleJsonBuilder(map);
     }
 
     public static SimpleJsonBuilder empty() {

@@ -21,7 +21,7 @@ public class AirPollutionCountService {
         this.airPollutionRepository = airPollutionRepository;
         this.cacheService = cacheService;
 
-        cacheService.registerSupplier(AIR_POLLUTION_BY_INDICATOR_AND_YEAR_KEY, CacheDependency.POLLUTION_DATA, this::fetchAverageByYearVoivodeshipAndIndicator);
+        cacheService.registerSupplier(AIR_POLLUTION_BY_INDICATOR_AND_YEAR_KEY, this::fetchAverageByYearVoivodeshipAndIndicator, CacheDependency.POLLUTION_DATA);
     }
 
     public List<Object[]> getAveragePollutionByIndicatorAndYear(String indicator, int year) {

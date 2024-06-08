@@ -30,10 +30,10 @@ public class VehiclesService {
     }
 
     private void registerSuppliers() {
-        cacheService.registerSupplier(VEHICLES_BY_AREA_CODE_KEY, CacheDependency.VEHICLES_DATA, this::fetchVehiclesCountByAreaCode);
-        cacheService.registerSupplier(REGISTRATIONS_BY_YEAR_AND_VOIVODESHIP_KEY, CacheDependency.VEHICLES_DATA, this::fetchRegistrationsByAreaCodeAndVoivodeships);
-        cacheService.registerSupplier(DEREGISTRATIONS_BY_YEAR_AND_VOIVODESHIP_KEY, CacheDependency.VEHICLES_DATA, this::fetchDeregistrationsByAreaCodeAndVoivodeships);
-        cacheService.registerSupplier(DEREGISTRATIONS_BY_AREA_CODE_KEY, CacheDependency.VEHICLES_DATA, this::fetchDeregistrationsByAreaCode);
+        cacheService.registerSupplier(VEHICLES_BY_AREA_CODE_KEY, this::fetchVehiclesCountByAreaCode, CacheDependency.VEHICLES_DATA);
+        cacheService.registerSupplier(REGISTRATIONS_BY_YEAR_AND_VOIVODESHIP_KEY, this::fetchRegistrationsByAreaCodeAndVoivodeships, CacheDependency.VEHICLES_DATA);
+        cacheService.registerSupplier(DEREGISTRATIONS_BY_YEAR_AND_VOIVODESHIP_KEY, this::fetchDeregistrationsByAreaCodeAndVoivodeships, CacheDependency.VEHICLES_DATA);
+        cacheService.registerSupplier(DEREGISTRATIONS_BY_AREA_CODE_KEY, this::fetchDeregistrationsByAreaCode, CacheDependency.VEHICLES_DATA);
     }
 
     private String fetchVehiclesCountByAreaCode() {
@@ -85,12 +85,12 @@ public class VehiclesService {
     }
 
     public String fetchRegistrationsByAreaCodeAndVoivodeships() {
-        List<Object[]> registrationsData = vehiclesRepository.countRegistrationsByAreaCodeAndAreaCode();
+        List<Object[]> registrationsData = vehiclesRepository.countRegistrationsByYearAndVoivodeship();
         return transformResultToJSON(registrationsData);
     }
 
     public String fetchDeregistrationsByAreaCodeAndVoivodeships() {
-        List<Object[]> deregistrationsData = vehiclesRepository.countDeregistrationsByAreaCodeAndAreaCode();
+        List<Object[]> deregistrationsData = vehiclesRepository.countDeregistrationsByYearAndVoivodeship();
         return transformResultToJSON(deregistrationsData);
     }
 

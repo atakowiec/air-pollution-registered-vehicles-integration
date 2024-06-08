@@ -1,6 +1,7 @@
 package pl.pollub.is.backend.cache;
 
 import lombok.RequiredArgsConstructor;
+import org.apache.commons.lang3.ArrayUtils;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 import pl.pollub.is.backend.cache.model.DatabaseCache;
@@ -18,14 +19,14 @@ public class DatabaseCacheService {
 
     private final Map<String, PackedCacheSupplier> cacheSuppliers = new HashMap<>();
 
-    public void registerSupplier(String key, CacheDependency dependency, CacheSupplier supplier) {
+    public void registerSupplier(String key, CacheSupplier supplier, CacheDependency ...dependency) {
         cacheSuppliers.put(key, new PackedCacheSupplier(key, supplier, dependency));
     }
 
     @Transactional
     public void onDependencyChange(CacheDependency dependency) {
         for (PackedCacheSupplier packedCacheSupplier : cacheSuppliers.values()) {
-            if (!packedCacheSupplier.getCacheDependency().equals(dependency)) {
+            if (!ArrayUtils.contains(packedCacheSupplier.getCacheDependencies(), dependency)) {
                 continue;
             }
 

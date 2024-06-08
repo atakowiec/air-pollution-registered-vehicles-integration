@@ -14,6 +14,6 @@ public class DatabaseCache {
     @Column(name = "cache_key", unique = true)
     private String cacheKey;
 
-    @Column(name = "value", columnDefinition = "TEXT")
+    @Column(name = "value", columnDefinition = "MEDIUMTEXT")
     private String value;
 }
