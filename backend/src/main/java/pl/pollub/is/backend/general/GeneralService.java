@@ -247,12 +247,4 @@ public class GeneralService {
 
         return byteArrayOutputStream;
     }
-
-    public ByteArrayOutputStream exportDataAsYaml(int startYear, int endYear, String voivodeships, String indicators) {
-        return null; // todo
-    }
-
-    public ByteArrayOutputStream exportDataAsXlsx(int startYear, int endYear, String voivodeships, String indicators) {
-        return null; // todo
-    }
 }

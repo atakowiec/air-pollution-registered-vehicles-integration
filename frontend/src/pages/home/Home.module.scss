@@ -47,6 +47,15 @@
   }
 }
 
+.modalSlider {
+  border: none !important;
+  box-shadow: none !important;
+
+  * {
+    box-shadow: none !important;
+  }
+}
+
 .scrollableTableWrapper {
   overflow-x: auto;
   max-width: 100%;

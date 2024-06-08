@@ -24,16 +24,16 @@ public class GeneralController {
     }
 
     @GetMapping("/export/counts/by-year-and-voivodeships/{format}")
-    public ResponseEntity<byte[]> exportDataByYearAndVoivodeships(@PathVariable ExportFormat format,
+    public ResponseEntity<byte[]> exportDataByYearAndVoivodeships(@PathVariable(name = "format") String stringFormat,
                                                                   @RequestParam(required = false, defaultValue = "-1") int startYear,
                                                                   @RequestParam(required = false, defaultValue = "-1") int endYear,
                                                                   @RequestParam(required = false, defaultValue = "*") String voivodeships,
                                                                   @RequestParam(required = false, defaultValue = "*") String indicators) {
+        ExportFormat format = ExportFormat.valueOf(stringFormat.toUpperCase());
+
         ByteArrayOutputStream outputStream = switch (format) {
             case JSON -> generalService.exportDataAsJson(startYear, endYear, voivodeships, indicators);
             case CSV -> generalService.exportDataAsCsv(startYear, endYear, voivodeships, indicators);
-            case XLSX -> generalService.exportDataAsXlsx(startYear, endYear, voivodeships, indicators);
-            case YAML -> generalService.exportDataAsYaml(startYear, endYear, voivodeships, indicators);
             case XML -> generalService.exportDataAsXml(startYear, endYear, voivodeships, indicators);
         };
 
