@@ -7,6 +7,8 @@ import lombok.RequiredArgsConstructor;
 import org.apache.commons.csv.CSVFormat;
 import org.apache.commons.csv.CSVPrinter;
 import org.springframework.stereotype.Service;
+import org.w3c.dom.Document;
+import org.w3c.dom.Element;
 import pl.pollub.is.backend.cache.DatabaseCacheService;
 import pl.pollub.is.backend.cache.supplier.CacheDependency;
 import pl.pollub.is.backend.exception.HttpException;
@@ -14,6 +16,13 @@ import pl.pollub.is.backend.pollution.AirPollutionRepository;
 import pl.pollub.is.backend.util.SimpleJsonBuilder;
 import pl.pollub.is.backend.vehicles.VehiclesRepository;
 
+import javax.xml.parsers.DocumentBuilder;
+import javax.xml.parsers.DocumentBuilderFactory;
+import javax.xml.transform.OutputKeys;
+import javax.xml.transform.Transformer;
+import javax.xml.transform.TransformerFactory;
+import javax.xml.transform.dom.DOMSource;
+import javax.xml.transform.stream.StreamResult;
 import java.io.ByteArrayOutputStream;
 import java.io.IOException;
 import java.io.OutputStreamWriter;
@@ -168,7 +177,7 @@ public class GeneralService {
         try (CSVPrinter csvPrinter = new CSVPrinter(new OutputStreamWriter(byteArrayOutputStream, StandardCharsets.UTF_8), format)) {
             List<String> keys = data.keySet().stream().sorted().toList();
 
-            for (String year: keys) {
+            for (String year : keys) {
                 Map<String, Map<String, Number>> value = data.get(year);
 
                 for (Map.Entry<String, Map<String, Number>> voivodeshipEntry : value.entrySet()) {
@@ -193,7 +202,50 @@ public class GeneralService {
     }
 
     public ByteArrayOutputStream exportDataAsXml(int startYear, int endYear, String voivodeships, String indicators) {
-        return null; // todo
+        Map<String, Map<String, Map<String, Number>>> data = prepareData(startYear, endYear, voivodeships, indicators);
+
+        ByteArrayOutputStream byteArrayOutputStream = new ByteArrayOutputStream();
+        DocumentBuilderFactory documentBuilderFactory = DocumentBuilderFactory.newInstance();
+        try {
+            DocumentBuilder documentBuilder = documentBuilderFactory.newDocumentBuilder();
+            Document document = documentBuilder.newDocument();
+
+            Element rootElement = document.createElement("data");
+            document.appendChild(rootElement);
+
+            for (Map.Entry<String, Map<String, Map<String, Number>>> yearEntry : data.entrySet()) {
+                Element yearElement = document.createElement("year");
+                yearElement.setAttribute("value", yearEntry.getKey());
+                rootElement.appendChild(yearElement);
+
+                for (Map.Entry<String, Map<String, Number>> voivodeshipEntry : yearEntry.getValue().entrySet()) {
+                    Element voivodeshipElement = document.createElement("voivodeship");
+                    voivodeshipElement.setAttribute("name", voivodeshipEntry.getKey());
+                    yearElement.appendChild(voivodeshipElement);
+
+                    for (Map.Entry<String, Number> indicatorEntry : voivodeshipEntry.getValue().entrySet()) {
+                        Element indicatorElement = document.createElement("indicator");
+                        indicatorElement.setAttribute("name", indicatorEntry.getKey());
+                        indicatorElement.setTextContent(indicatorEntry.getValue().toString());
+                        voivodeshipElement.appendChild(indicatorElement);
+                    }
+                }
+            }
+
+            TransformerFactory transformerFactory = TransformerFactory.newInstance();
+            Transformer transformer = transformerFactory.newTransformer();
+
+            transformer.setOutputProperty(OutputKeys.ENCODING, "UTF-8");
+            transformer.setOutputProperty(OutputKeys.INDENT, "yes");
+
+            DOMSource domSource = new DOMSource(document);
+
+            transformer.transform(domSource, new StreamResult(new OutputStreamWriter(byteArrayOutputStream, StandardCharsets.UTF_8)));
+        } catch (Exception e) {
+            throw new HttpException(500, "Internal server error while exporting data.");
+        }
+
+        return byteArrayOutputStream;
     }
 
     public ByteArrayOutputStream exportDataAsYaml(int startYear, int endYear, String voivodeships, String indicators) {
