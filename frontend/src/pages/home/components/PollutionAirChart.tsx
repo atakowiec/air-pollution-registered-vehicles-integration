@@ -9,7 +9,7 @@ import {
   Area,
 } from "recharts";
 import style from "../Home.module.scss";
-import { PropsWithApiData } from "./ChartStatusOverlay.tsx";
+import ChartStatusOverlay, { PropsWithApiData } from "./ChartStatusOverlay.tsx";
 
 export default function PollutionAirChart({ apiData }: PropsWithApiData) {
   const [selectedProvince, setSelectedProvince] = useState("dolnośląskie");
@@ -36,7 +36,7 @@ export default function PollutionAirChart({ apiData }: PropsWithApiData) {
   
 
   return (
-    <div className={"col-12 col-xl-6"}>
+    <div className={`col-12 col-xl-6 ${style.chartContainer}`}>
       <h3 className={style.chartTitle}>Wykres liniowy dla zanieczyszczenia NO2 i NOx w wybranym województwie</h3>
       <div>
         <select value={selectedProvince} onChange={handleProvinceChange} className="form-select m-2 ">
@@ -85,6 +85,7 @@ export default function PollutionAirChart({ apiData }: PropsWithApiData) {
           />
         </AreaChart>
       </ResponsiveContainer>
+      <ChartStatusOverlay apiData={apiData}/>
     </div>
   );
 }

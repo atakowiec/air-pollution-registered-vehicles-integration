@@ -13,7 +13,7 @@ export function MainNavbar() {
   return (
     <Navbar expand="lg" className="bg-body-tertiary">
       <Container>
-        <Navbar.Brand as={NavLink} to="/">Jakas nazwa</Navbar.Brand>
+        <Navbar.Brand as={NavLink} to="/">Projekt IS</Navbar.Brand>
         <Navbar.Toggle aria-controls="basic-navbar-nav"/>
         <Navbar.Collapse id="basic-navbar-nav">
           <Nav style={{width: "100%"}}>

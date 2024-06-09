@@ -1,10 +1,11 @@
 import style from "../Home.module.scss";
 import {Table} from "react-bootstrap";
-import {formatNumber} from "../../../util/utils.ts";
+import {formatNumber, isEmpty} from "../../../util/utils.ts";
 import {INDICATORS} from "./MapAndTable.tsx";
 import {MergedData, VoivodeshipData, YearData} from "../hooks/HomeDataContext.tsx";
 import {useMemo, useState} from "react";
 import {FaSort, FaSortDown, FaSortUp} from "react-icons/fa6";
+import {useMergedData} from "../hooks/homeHooks.ts";
 
 interface TableProps {
   data: YearData | null | undefined
@@ -35,6 +36,7 @@ export default function MainTable({
   const TABLE_HEADERS = ["registrations", "deregistrations", ...INDICATORS]
   const [sortOrder, setSortOrder] = useState<SortOrder>("none")
   const [sortColumn, setSortColumn] = useState<SortColumn>("none")
+  const mergedData = useMergedData();
 
   /**
    * Sorts voivodeships based on the current sort order and column and returns an array of voivodeship names.
@@ -95,6 +97,8 @@ export default function MainTable({
     setSortOrder("asc")
   }
 
+  console.log({finalData})
+
   return (
     <div className={`col-12 col-xxl-7 ${style.table}`}>
       <div className={style.scrollableTableWrapper}>
@@ -129,7 +133,7 @@ export default function MainTable({
           </tr>
           </thead>
           <tbody>
-          {finalData
+          {mergedData.loaded && finalData && !isEmpty(finalData)
             ? (sortedVoivodeshipNames as Array<keyof MergedData>)
               .map((voivodeshipName) => (
                 <tr key={voivodeshipName}
@@ -144,9 +148,14 @@ export default function MainTable({
                   ))}
                 </tr>
               ))
-            : Array.from({length: 16}, (_, i) => (
-              <LoadingRow key={i} i={i}/>
-            ))}
+            : mergedData.loaded && (!finalData || isEmpty(finalData)) ? (
+                <tr>
+                  <td colSpan={3 + INDICATORS.length} className={"text-center"}>Brak danych do wyświetlenia</td>
+                </tr>
+              )
+              : Array.from({length: 16}, (_, i) => (
+                <LoadingRow key={i} i={i}/>
+              ))}
           </tbody>
         </Table>
       </div>

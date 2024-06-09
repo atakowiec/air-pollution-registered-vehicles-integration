@@ -1,10 +1,10 @@
 import style from "../Home.module.scss";
 import { ResponsiveContainer, PieChart, Pie, Tooltip } from "recharts";
 import { useMemo, useState } from "react";
-import { PropsWithApiData } from "./ChartStatusOverlay.tsx";
+import ChartStatusOverlay, { PropsWithApiData } from "./ChartStatusOverlay.tsx";
 
 export default function VehiclesPieChart({ apiData }: PropsWithApiData) {
-  const [activeIndex, setActiveIndex] = useState<number | null>(null);
+  const [_, setActiveIndex] = useState<number | null>(null);
 
   type PieData = {
     name: string;
@@ -32,7 +32,7 @@ export default function VehiclesPieChart({ apiData }: PropsWithApiData) {
   };
 
   return (
-    <div className={"col-12 col-xl-6"}>
+    <div className={`col-12 col-xl-6 ${style.chartContainer}`}>
       <h3 className={style.chartTitle}>
         {" "}
         Wyrejestrowane pojazdy na przestrzeni lat w poszczególnych województwach
@@ -53,6 +53,7 @@ export default function VehiclesPieChart({ apiData }: PropsWithApiData) {
           <Tooltip />
         </PieChart>
       </ResponsiveContainer>
+      <ChartStatusOverlay apiData={apiData}/>
       <style>{`
         .recharts-pie-labels {
           font-size: ${labelStyle.fontSize};

@@ -83,7 +83,6 @@ public class AuthController {
     public Map<?, ?> verify(HttpServletRequest req, HttpServletResponse res) {
         Claims claims = jwtService.resolveClaims(req);
         if (claims == null || !claims.containsKey("id")) {
-            log.warn("User tried to verify token without providing it");
             throw new HttpException(401, "Niepoprawne dane logowania");
         }
 

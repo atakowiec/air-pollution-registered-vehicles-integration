@@ -4,8 +4,11 @@ import {ChangeEvent, useState} from "react";
 import {getApi} from "../../../axios/axios.ts";
 import {MainNavbar} from "../../../components/MainNavbar.tsx";
 import PollutionImportProgressInfo from "./PollutionImportProgressInfo.tsx";
+import {title} from "../../../util/title.ts";
 
 export default function PollutionFileImport() {
+  title("Import danych z pliku XLSX")
+
   const [selectedFile, setSelectedFile] = useState<File | null>(null)
   const [status, setStatus] = useState("")
 

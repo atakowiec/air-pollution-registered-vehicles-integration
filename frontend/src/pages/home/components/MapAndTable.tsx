@@ -41,7 +41,7 @@ export default function MapAndTable() {
     mergedData.data?.[selectedYear] :
     cumulativeData.data ?
       cumulativeData.data[Math.max(...Object.keys(cumulativeData.data).map(Number))] :
-      undefined;
+      mergedData.loaded && cumulativeData.loaded ? {} : undefined;
 
   const handleIndicatorChange = (event: ChangeEvent<HTMLSelectElement>) => {
     setSelectedIndicator(event.target.value || null);

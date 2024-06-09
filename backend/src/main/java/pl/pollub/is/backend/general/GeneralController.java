@@ -39,7 +39,7 @@ public class GeneralController {
 
         HttpHeaders httpHeaders = new HttpHeaders();
         httpHeaders.setContentType(MediaType.APPLICATION_OCTET_STREAM);
-        httpHeaders.setContentDispositionFormData("attachment", STR."data-\{System.currentTimeMillis()}.\{format.toLowerCase()}");
+        httpHeaders.setContentDispositionFormData("attachment", "data-%d.%s".formatted(System.currentTimeMillis(), format.toLowerCase()));
         httpHeaders.add(HttpHeaders.CONTENT_ENCODING, "UTF-8");
 
         return ResponseEntity.ok()

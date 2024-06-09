@@ -8,7 +8,7 @@ import {
   RadarChart,
 } from "recharts";
 import style from "../Home.module.scss";
-import { PropsWithApiData } from "./ChartStatusOverlay.tsx";
+import ChartStatusOverlay, { PropsWithApiData } from "./ChartStatusOverlay.tsx";
 
 export default function PollutionRadarChart({ apiData }: PropsWithApiData) {
   const [selectedProvince, setSelectedProvince] = useState("dolnośląskie");
@@ -62,7 +62,7 @@ export default function PollutionRadarChart({ apiData }: PropsWithApiData) {
   }, [pollutionData]);
 
   return (
-    <div className={"col-12 col-xl-6"}>
+    <div className={`col-12 col-xl-6 ${style.chartContainer}`}>
       <h3 className={style.chartTitle}>Wykres radarowy dla wybranego pierwiastka</h3>
       <div>
         <select value={selectedProvince} onChange={handleProvinceChange} className="form-select m-2">
@@ -94,6 +94,7 @@ export default function PollutionRadarChart({ apiData }: PropsWithApiData) {
           />
         </RadarChart>
       </ResponsiveContainer>
+      <ChartStatusOverlay apiData={apiData}/>
     </div>
   );
 }
