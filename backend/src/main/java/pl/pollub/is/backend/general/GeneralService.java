@@ -27,8 +27,7 @@ import java.io.ByteArrayOutputStream;
 import java.io.IOException;
 import java.io.OutputStreamWriter;
 import java.nio.charset.StandardCharsets;
-import java.time.ZoneOffset;
-import java.time.ZonedDateTime;
+import java.time.LocalDateTime;
 import java.time.format.DateTimeFormatter;
 import java.util.ArrayList;
 import java.util.HashMap;
@@ -139,7 +138,7 @@ public class GeneralService {
 
         // first we need to create some metadata
         SimpleJsonBuilder metadataBuilder = SimpleJsonBuilder.empty();
-        metadataBuilder.add("exported_at", ZonedDateTime.now(ZoneOffset.UTC).format(DateTimeFormatter.ISO_INSTANT));
+        metadataBuilder.add("exported_at", LocalDateTime.now().format(DateTimeFormatter.ISO_LOCAL_DATE_TIME));
         metadataBuilder.add("title", "Data grouped by year and voivodeships");
         metadataBuilder.add("description", "Data about vehicle registrations, deregistrations and air pollution by year and voivodeship. Air pollution data is presented as average values of each indicator.");
         if (startYear != -1) metadataBuilder.add("start_year", startYear);
@@ -209,14 +208,19 @@ public class GeneralService {
         try {
             DocumentBuilder documentBuilder = documentBuilderFactory.newDocumentBuilder();
             Document document = documentBuilder.newDocument();
-
-            Element rootElement = document.createElement("data");
+            Element rootElement = document.createElement("root");
             document.appendChild(rootElement);
+
+            // metadata
+            xmlMetadata(startYear, endYear, voivodeships, indicators, document, rootElement);
+
+            Element dataElement = document.createElement("data");
+            rootElement.appendChild(dataElement);
 
             for (Map.Entry<String, Map<String, Map<String, Number>>> yearEntry : data.entrySet()) {
                 Element yearElement = document.createElement("year");
                 yearElement.setAttribute("value", yearEntry.getKey());
-                rootElement.appendChild(yearElement);
+                dataElement.appendChild(yearElement);
 
                 for (Map.Entry<String, Map<String, Number>> voivodeshipEntry : yearEntry.getValue().entrySet()) {
                     Element voivodeshipElement = document.createElement("voivodeship");
@@ -246,5 +250,50 @@ public class GeneralService {
         }
 
         return byteArrayOutputStream;
+    }
+
+    private void xmlMetadata(int startYear, int endYear, String voivodeships, String indicators, Document document, Element rootElement) {
+        Element metadataElement = document.createElement("metadata");
+        rootElement.appendChild(metadataElement);
+
+        Element exportedAtElement = document.createElement("exported_at");
+        exportedAtElement.setTextContent(LocalDateTime.now().format(DateTimeFormatter.ISO_LOCAL_DATE_TIME));
+        metadataElement.appendChild(exportedAtElement);
+
+        Element titleElement = document.createElement("title");
+        titleElement.setTextContent("Data grouped by year and voivodeships");
+        metadataElement.appendChild(titleElement);
+
+        Element descriptionElement = document.createElement("description");
+        descriptionElement.setTextContent("Data about vehicle registrations, deregistrations and air pollution by year and voivodeship. Air pollution data is presented as average values of each indicator.");
+        metadataElement.appendChild(descriptionElement);
+
+        if (startYear != -1) {
+            Element startYearElement = document.createElement("start_year");
+            startYearElement.setTextContent(String.valueOf(startYear));
+            metadataElement.appendChild(startYearElement);
+        }
+
+        if (endYear != -1) {
+            Element endYearElement = document.createElement("end_year");
+            endYearElement.setTextContent(String.valueOf(endYear));
+            metadataElement.appendChild(endYearElement);
+        }
+
+        Element selectedVoivodeshipsElement = document.createElement("selected_voivodeships");
+        metadataElement.appendChild(selectedVoivodeshipsElement);
+        for (String voivodeship : voivodeships.split(",")) {
+            Element voivodeshipElement = document.createElement("voivodeship");
+            voivodeshipElement.setTextContent(voivodeship);
+            selectedVoivodeshipsElement.appendChild(voivodeshipElement);
+        }
+
+        Element selectedIndicatorsElement = document.createElement("selected_indicators");
+        metadataElement.appendChild(selectedIndicatorsElement);
+        for (String indicator : indicators.split(",")) {
+            Element indicatorElement = document.createElement("indicator");
+            indicatorElement.setTextContent(indicator);
+            selectedIndicatorsElement.appendChild(indicatorElement);
+        }
     }
 }
