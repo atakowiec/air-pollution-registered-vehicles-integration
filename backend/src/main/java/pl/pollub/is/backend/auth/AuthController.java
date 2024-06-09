@@ -5,6 +5,7 @@ import jakarta.servlet.http.HttpServletRequest;
 import jakarta.servlet.http.HttpServletResponse;
 import jakarta.validation.Valid;
 import lombok.RequiredArgsConstructor;
+import lombok.extern.slf4j.Slf4j;
 import org.springframework.http.HttpStatus;
 import org.springframework.web.bind.annotation.*;
 import pl.pollub.is.backend.auth.dto.LoginDto;
@@ -20,6 +21,7 @@ import java.util.Map;
 @RestController
 @RequiredArgsConstructor
 @RequestMapping("/auth")
+@Slf4j(topic = "AuthController")
 public class AuthController {
     private final AuthService authService;
     private final JwtService jwtService;
@@ -27,6 +29,7 @@ public class AuthController {
     @PostMapping("/register")
     public Map<?, ?> register(@Valid @RequestBody RegisterDto registerDto, HttpServletResponse res) {
         if (authService.isUsernameTaken(registerDto.getUsername())) {
+            log.warn("User tried to register with already taken username: {}", registerDto.getUsername());
             throw new HttpException(HttpStatus.CONFLICT, "Nazwa użytkownika jest już zajęta");
         }
 
@@ -40,6 +43,7 @@ public class AuthController {
 
         res.setStatus(201);
         jwtService.addTokenToResponse(res, user);
+        log.info("User registered: {}", user.getUsername());
 
         return SimpleJsonBuilder.of("id", user.getId())
                 .add("username", user.getUsername())
@@ -50,13 +54,18 @@ public class AuthController {
     @PostMapping("/login")
     public Map<?, ?> login(@Valid @RequestBody LoginDto loginDto, HttpServletResponse res) {
         User user = authService.getUsersRepository().findByUsername(loginDto.getUsername())
-                .orElseThrow(() -> new HttpException(HttpStatus.UNAUTHORIZED, "Niepoprawne dane logowania"));
+                .orElseThrow(() -> {
+                    log.warn("User tried to login with non-existing username: {}", loginDto.getUsername());
+                    return new HttpException(HttpStatus.UNAUTHORIZED, "Niepoprawne dane logowania");
+                });
 
         if (!authService.verifyPassword(user.getPassword(), loginDto.getPassword())) {
+            log.warn("User tried to login with incorrect password: {}", loginDto.getUsername());
             throw new HttpException(HttpStatus.UNAUTHORIZED, "Niepoprawne dane logowania");
         }
 
         jwtService.addTokenToResponse(res, user);
+        log.info("User logged in: {}", user.getUsername());
 
         return SimpleJsonBuilder.of("id", user.getId())
                 .add("username", user.getUsername())
@@ -74,13 +83,18 @@ public class AuthController {
     public Map<?, ?> verify(HttpServletRequest req, HttpServletResponse res) {
         Claims claims = jwtService.resolveClaims(req);
         if (claims == null || !claims.containsKey("id")) {
+            log.warn("User tried to verify token without providing it");
             throw new HttpException(401, "Niepoprawne dane logowania");
         }
 
         User user = authService.getUsersRepository().findById(claims.get("id", Long.class))
-                .orElseThrow(() -> new HttpException(401, "Niepoprawne dane logowania"));
+                .orElseThrow(() -> {
+                    log.warn("User tried to verify token with non-existing user id: {}", claims.get("id", Long.class));
+                    return new HttpException(401, "Niepoprawne dane logowania");
+                });
 
         jwtService.addTokenToResponse(res, user);
+        log.info("User verified: {}", user.getUsername());
 
         return SimpleJsonBuilder.of("id", user.getId())
                 .add("username", user.getUsername())

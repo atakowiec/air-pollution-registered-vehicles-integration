@@ -2,6 +2,7 @@ package pl.pollub.is.backend.pollution;
 
 import jakarta.persistence.EntityManager;
 import jakarta.persistence.EntityManagerFactory;
+import lombok.extern.slf4j.Slf4j;
 import org.dhatim.fastexcel.reader.Cell;
 import org.dhatim.fastexcel.reader.ReadableWorkbook;
 import org.dhatim.fastexcel.reader.Row;
@@ -17,7 +18,9 @@ import pl.pollub.is.backend.exception.HttpException;
 import pl.pollub.is.backend.pollution.progress.PollutionImportProgress;
 import pl.pollub.is.backend.progress.ProgressService;
 import pl.pollub.is.backend.progress.model.ProgressStatus;
+import pl.pollub.is.backend.util.FileUtil;
 
+import java.io.File;
 import java.io.IOException;
 import java.util.ArrayList;
 import java.util.HashMap;
@@ -26,6 +29,7 @@ import java.util.Map;
 import java.util.stream.Stream;
 
 @Service
+@Slf4j(topic = "Air Pollution Service")
 public class AirPollutionService {
     private final static List<String> ALLOWED_INDICATORS = List.of("SO2", "NO2", "PM2,5", "Pb(PM10)", "NOx");
     private final static List<String> COLUMN_NAMES = List.of("Rok", "Województwo", "Kod strefy", "Kod stacji", "Wskaźnik", "Czas uśredniania", "Średnia", "Liczba pomiarów");
@@ -52,12 +56,16 @@ public class AirPollutionService {
         if (progress.getStatus() == ProgressStatus.IN_PROGRESS)
             throw new HttpException(HttpStatus.CONFLICT, "Operation already in progress");
 
+        File file = FileUtil.multipartToFile(multipartFile);
+
         progress.clear();
+        log.info("Started processing air pollution data from file: {}", multipartFile.getOriginalFilename());
 
         // start processing file in background
         asyncExecutor.execute(() -> {
+            progress.setStatus(ProgressStatus.IN_PROGRESS);
             progress.setStartDate();
-            try (ReadableWorkbook wb = new ReadableWorkbook(multipartFile.getInputStream())) {
+            try (ReadableWorkbook wb = new ReadableWorkbook(file)) {
                 progress.setDataLoaded(true);
 
                 // first count rows in all sheets
@@ -66,9 +74,11 @@ public class AirPollutionService {
 
                 progress.setEndDate();
                 progress.setStatus(ProgressStatus.FINISHED);
+                log.info("Finished processing air pollution data from file: {}", multipartFile.getOriginalFilename());
             } catch (IOException e) {
                 progress.setStatus(ProgressStatus.FAILED);
                 progress.setEndDate();
+                log.error("Error while reading excel file", e);
                 throw new HttpException(500, "Error while reading excel file");
             }
         });
@@ -148,11 +158,14 @@ public class AirPollutionService {
             EntityManager entityManager = entityManagerFactory.createEntityManager();
             entityManager.getTransaction().begin();
 
+            int saved = 0;
             for (AirPollution airPollution : toSave) {
                 entityManager.persist(airPollution);
                 progress.addSaved(1);
                 progress.addIndicatorSaved(sheet.getName(), 1);
+                saved++;
             }
+            log.info("Saved {} air pollution records for indicator {}", saved, sheet.getName());
             entityManager.getTransaction().commit();
             entityManager.clear();
             entityManager.close();

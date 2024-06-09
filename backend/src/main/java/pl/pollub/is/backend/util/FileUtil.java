@@ -8,12 +8,16 @@ import java.nio.file.Files;
 import java.util.UUID;
 
 public class FileUtil {
-    public static File multipartToFile(MultipartFile file) throws IOException {
-        if(file == null || file.getOriginalFilename() == null)
+    public static File multipartToFile(MultipartFile file) {
+        if (file == null || file.getOriginalFilename() == null)
             return null;
 
-        File convFile = Files.createTempFile("is_backend", UUID.randomUUID().toString()).toFile();
-        file.transferTo(convFile);
-        return convFile;
+        try {
+            File convFile = convFile = Files.createTempFile("is_backend", UUID.randomUUID().toString()).toFile();
+            file.transferTo(convFile);
+            return convFile;
+        } catch (IOException e) {
+            throw new RuntimeException(e);
+        }
     }
 }

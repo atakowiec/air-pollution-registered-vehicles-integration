@@ -110,6 +110,7 @@ export default function PollutionImportProgressInfo() {
     }
   }, [progress?.data ?? {}])
 
+  if (!progress || calculatedData.status == "NOT_STARTED") return null
   return (
     <Container className={"text-center px-0 mt-2 col-12 col-md-8 col-xl-6 col-xxl-5 gap-5 mb-5 pb-5"}>
       <Container className={"bg-light rounded p-2 mb-2"}>

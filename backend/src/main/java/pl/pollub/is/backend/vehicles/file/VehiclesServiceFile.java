@@ -2,6 +2,7 @@ package pl.pollub.is.backend.vehicles.file;
 
 import jakarta.persistence.EntityManager;
 import jakarta.persistence.EntityManagerFactory;
+import lombok.extern.slf4j.Slf4j;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.scheduling.concurrent.ThreadPoolTaskExecutor;
@@ -32,6 +33,7 @@ import java.util.List;
 import static com.microsoft.sqlserver.jdbc.StringUtils.isNumeric;
 
 @Service
+@Slf4j(topic = "Vehicles File Service")
 public class VehiclesServiceFile {
     private final static int THREAD_POOL_SIZE = 6;
     private final static int ROWS_PER_THREAD = 5000;
@@ -57,6 +59,7 @@ public class VehiclesServiceFile {
         if (progress.getStatus() == ProgressStatus.IN_PROGRESS)
             throw new HttpException(HttpStatus.CONFLICT, "Operation already in progress");
 
+        log.info("Processing CSV file: {}", multipartFile.getOriginalFilename());
         // clone multipartFile because spring deletes uploaded files as soon as the request is handled
         File file = FileUtil.multipartToFile(multipartFile);
 
@@ -273,6 +276,7 @@ public class VehiclesServiceFile {
                 }
                 cacheService.onDependencyChange(CacheDependency.VEHICLES_DATA);
                 progress.setEndDate();
+                log.info("Import of vehicles data finished");
             }
         });
     }

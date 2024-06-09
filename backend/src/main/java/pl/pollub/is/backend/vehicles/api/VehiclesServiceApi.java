@@ -3,9 +3,12 @@ package pl.pollub.is.backend.vehicles.api;
 import com.fasterxml.jackson.databind.JsonNode;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import lombok.RequiredArgsConstructor;
+import lombok.extern.slf4j.Slf4j;
+import org.springframework.http.HttpStatus;
 import org.springframework.stereotype.Service;
 import pl.pollub.is.backend.cache.DatabaseCacheService;
 import pl.pollub.is.backend.cache.supplier.CacheDependency;
+import pl.pollub.is.backend.exception.HttpException;
 import pl.pollub.is.backend.vehicles.VehiclesRepository;
 import pl.pollub.is.backend.vehicles.model.Vehicle;
 
@@ -23,17 +26,21 @@ import static com.microsoft.sqlserver.jdbc.StringUtils.isNumeric;
 
 @Service
 @RequiredArgsConstructor
+@Slf4j(topic = "Vehicles API Service")
 public class VehiclesServiceApi {
     private final VehiclesRepository vehiclesRepository;
     private final DatabaseCacheService cacheService;
 
     public void processJsonFromUrl(String jsonString) throws IOException, ParseException {
+        log.info("Started processing vehicles data from API.");
+
         ObjectMapper objectMapper = new ObjectMapper();
         JsonNode rootNode = objectMapper.readTree(jsonString);
         JsonNode apiUrlNode = rootNode.get("apiUrl");
         if (apiUrlNode != null) {
             String apiUrl = apiUrlNode.asText();
             ObjectMapper objectMapper2 = new ObjectMapper();
+            log.info("Fetching data from API: {}", apiUrl);
             URL url = new URL(apiUrl);
             String jsonContent = stream(url);
             JsonNode apiUrlData = objectMapper2.readTree(jsonContent);
@@ -49,26 +56,28 @@ public class VehiclesServiceApi {
             }
         }
         else {
-            throw new IllegalStateException("Missing 'apiUrl' field in vehicle JSON.");
+            throw new HttpException(HttpStatus.BAD_REQUEST, "Invalid JSON format. Missing 'apiUrl' field.");
         }
 
         cacheService.onDependencyChange(CacheDependency.VEHICLES_DATA);
     }
 
     private void processVehicleArray(JsonNode dataNode) throws ParseException {
-
         for (JsonNode vehicleNode : dataNode) {
             JsonNode attributesNode = vehicleNode.get("attributes");
             Vehicle vehicle = createVehicleFromJson(vehicleNode, attributesNode);
             vehiclesRepository.save(vehicle);
         }
+
+        log.info("{} vehicles have been saved to the database.", dataNode.size());
     }
 
     private void processSingleVehicle(JsonNode vehicleNode) throws ParseException {
-
         JsonNode attributesNode = vehicleNode.get("attributes");
         Vehicle vehicle = createVehicleFromJson(vehicleNode,attributesNode);
         vehiclesRepository.save(vehicle);
+
+        log.info("Vehicle with ID {} has been saved to the database.", vehicle.getVehicleId());
     }
 
     public static String stream(URL url) throws IOException {
