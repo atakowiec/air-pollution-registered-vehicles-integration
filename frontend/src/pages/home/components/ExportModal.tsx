@@ -97,7 +97,7 @@ export default function ExportModal(props: ExportModalProps) {
           <Modal.Title>Export danych</Modal.Title>
         </Modal.Header>
         <Modal.Body className={"text-center"}>
-          Abym mógł wyeksportować dane, musisz być zalogowany.
+          Abyś mógł wyeksportować dane, musisz być zalogowany.
         </Modal.Body>
         <Modal.Footer>
           <Button variant="outline-primary" onClick={props.onClose}>
@@ -149,7 +149,7 @@ export default function ExportModal(props: ExportModalProps) {
         </div>
         {selectedIndicators.length === 0 && (
           <p className="text-danger mt-3">
-            Proszę wybrać co najmniej jeden wskaźnik.
+            Proszę wybrać co najmniej jedno pole.
           </p>
         )}
         <h5 className={"mt-4"}>Wybierz wojewodztwa</h5>
