@@ -3,6 +3,9 @@ import {useState} from "react";
 import style from "../Home.module.scss"
 import MultiRangeSlider, {ChangeResult} from "multi-range-slider-react";
 import {VOIVODESHIPS} from "./PolandMap.tsx";
+import {useSelector} from "react-redux";
+import {State} from "../../../store";
+import {Link} from "react-router-dom";
 
 interface ExportModalProps {
   isOpen: boolean;
@@ -31,6 +34,7 @@ export default function ExportModal(props: ExportModalProps) {
   const [selectedIndicators, setSelectedIndicators] = useState<ExportIndicator[]>([...INDICATORS]);
   const [selectedVoivodeships, setSelectedVoivodeships] = useState<ExportVoivodeship[]>([...VOIVODESHIPS]);
   const [range, setRange] = useState<[number, number]>([1900, 2020]);
+  const user = useSelector((state: State) => state.user);
 
   function onVoivodeshipClick(voivodeship: ExportVoivodeship) {
     if (selectedVoivodeships.includes(voivodeship)) {
@@ -64,6 +68,30 @@ export default function ExportModal(props: ExportModalProps) {
 
     const newWindow = window.open(url, '_blank', 'noopener,noreferrer')
     if (newWindow) newWindow.opener = null
+  }
+
+  if (!user?.isLogged) {
+    return (
+      <Modal show={props.isOpen} onHide={props.onClose}>
+        <Modal.Header closeButton>
+          <Modal.Title>Export danych</Modal.Title>
+        </Modal.Header>
+        <Modal.Body className={"text-center"}>
+          Abym mógł wyeksportować dane, musisz być zalogowany.
+        </Modal.Body>
+        <Modal.Footer>
+          <Button variant="outline-primary" onClick={props.onClose}>
+            Anuluj
+          </Button>
+          <Link to={"/register"} className={"btn btn-primary"}>
+            Zarejestruj
+          </Link>
+          <Link to={"/login"} className={"btn btn-primary"}>
+            Zaloguj
+          </Link>
+        </Modal.Footer>
+      </Modal>
+    )
   }
 
   return (

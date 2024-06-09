@@ -31,7 +31,6 @@ export default function PollutionFileImport() {
       },
     }).catch(() => {
       setStatus("Wystąpił błąd podczas importu danych")
-    }).finally(() => {
     })
   }
 
@@ -47,7 +46,7 @@ export default function PollutionFileImport() {
         </Form>
         {status && <p className={"mt-3"}>{status}</p>}
       </Container>
-      <PollutionImportProgressInfo />
+      <PollutionImportProgressInfo/>
     </>
   )
 }

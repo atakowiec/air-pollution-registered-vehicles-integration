@@ -24,9 +24,8 @@ public class SecurityConfig {
         return http
                 .csrf(AbstractHttpConfigurer::disable)
                 .authorizeHttpRequests(auth -> {
-                    // todo is there a better way to handle this???
                     auth.requestMatchers("/auth/**").permitAll();
-                    auth.requestMatchers("/api/products/admin").hasAuthority("ADMIN");
+                    auth.requestMatchers("/export/counts/**").authenticated();
                     auth.anyRequest().permitAll();
                 })
                 .sessionManagement((configurer -> configurer.sessionCreationPolicy(SessionCreationPolicy.STATELESS)))
