@@ -1,23 +1,31 @@
-import {Button, Modal} from "react-bootstrap";
-import {useState} from "react";
-import style from "../Home.module.scss"
-import MultiRangeSlider, {ChangeResult} from "multi-range-slider-react";
-import {VOIVODESHIPS} from "./PolandMap.tsx";
-import {useSelector} from "react-redux";
-import {State} from "../../../store";
-import {Link} from "react-router-dom";
+import { Button, Modal } from "react-bootstrap";
+import { useState } from "react";
+import style from "../Home.module.scss";
+import MultiRangeSlider, { ChangeResult } from "multi-range-slider-react";
+import { VOIVODESHIPS } from "./PolandMap.tsx";
+import { useSelector } from "react-redux";
+import { State } from "../../../store";
+import { Link } from "react-router-dom";
 
 interface ExportModalProps {
   isOpen: boolean;
   onClose: () => void;
 }
 
-const INDICATORS = ["registrations", "deregistrations", "SO2", "NO2", "PM2.5", "Pb(PM10)", "NOx"];
+const INDICATORS = [
+  "registrations",
+  "deregistrations",
+  "SO2",
+  "NO2",
+  "PM2.5",
+  "Pb(PM10)",
+  "NOx",
+];
 const FORMATS = ["CSV", "JSON", "XML"];
 
-type ExportFormat = typeof FORMATS[number];
-type ExportIndicator = typeof INDICATORS[number];
-type ExportVoivodeship = typeof VOIVODESHIPS[number];
+type ExportFormat = (typeof FORMATS)[number];
+type ExportIndicator = (typeof INDICATORS)[number];
+type ExportVoivodeship = (typeof VOIVODESHIPS)[number];
 
 function mapIndicatorName(indicator: ExportIndicator): string {
   switch (indicator) {
@@ -31,14 +39,20 @@ function mapIndicatorName(indicator: ExportIndicator): string {
 
 export default function ExportModal(props: ExportModalProps) {
   const [format, setFormat] = useState<ExportFormat>("JSON");
-  const [selectedIndicators, setSelectedIndicators] = useState<ExportIndicator[]>([...INDICATORS]);
-  const [selectedVoivodeships, setSelectedVoivodeships] = useState<ExportVoivodeship[]>([...VOIVODESHIPS]);
+  const [selectedIndicators, setSelectedIndicators] = useState<
+    ExportIndicator[]
+  >([]);
+  const [selectedVoivodeships, setSelectedVoivodeships] = useState<
+    ExportVoivodeship[]
+  >([]);
   const [range, setRange] = useState<[number, number]>([1900, 2020]);
   const user = useSelector((state: State) => state.user);
 
   function onVoivodeshipClick(voivodeship: ExportVoivodeship) {
     if (selectedVoivodeships.includes(voivodeship)) {
-      setSelectedVoivodeships(selectedVoivodeships.filter(v => v !== voivodeship));
+      setSelectedVoivodeships(
+        selectedVoivodeships.filter((v) => v !== voivodeship)
+      );
     } else {
       setSelectedVoivodeships([...selectedVoivodeships, voivodeship]);
     }
@@ -46,7 +60,7 @@ export default function ExportModal(props: ExportModalProps) {
 
   function onIndicatorClick(indicator: ExportIndicator) {
     if (selectedIndicators.includes(indicator)) {
-      setSelectedIndicators(selectedIndicators.filter(i => i !== indicator));
+      setSelectedIndicators(selectedIndicators.filter((i) => i !== indicator));
     } else {
       setSelectedIndicators([...selectedIndicators, indicator]);
     }
@@ -62,12 +76,18 @@ export default function ExportModal(props: ExportModalProps) {
       return;
     }
 
-    const indicators = selectedIndicators.length === INDICATORS.length ? "*" : selectedIndicators.join(",");
-    const voivodeships = selectedVoivodeships.length === VOIVODESHIPS.length ? "*" : selectedVoivodeships.join(",");
+    const indicators =
+      selectedIndicators.length === INDICATORS.length
+        ? "*"
+        : selectedIndicators.join(",");
+    const voivodeships =
+      selectedVoivodeships.length === VOIVODESHIPS.length
+        ? "*"
+        : selectedVoivodeships.join(",");
     const url = `http://localhost:5000/export/counts/by-year-and-voivodeships/${format}?indicators=${indicators}&voivodeships=${voivodeships}&startYear=${range[0]}&endYear=${range[1]}`;
 
-    const newWindow = window.open(url, '_blank', 'noopener,noreferrer')
-    if (newWindow) newWindow.opener = null
+    const newWindow = window.open(url, "_blank", "noopener,noreferrer");
+    if (newWindow) newWindow.opener = null;
   }
 
   if (!user?.isLogged) {
@@ -91,7 +111,7 @@ export default function ExportModal(props: ExportModalProps) {
           </Link>
         </Modal.Footer>
       </Modal>
-    )
+    );
   }
 
   return (
@@ -102,7 +122,7 @@ export default function ExportModal(props: ExportModalProps) {
       <Modal.Body className={"text-center"}>
         <h5>Wybierz format</h5>
         <div className={"d-flex gap-2 justify-content-center"}>
-          {FORMATS.map(f => (
+          {FORMATS.map((f) => (
             <Button
               key={f}
               variant={format === f ? "primary" : "outline-primary"}
@@ -115,30 +135,42 @@ export default function ExportModal(props: ExportModalProps) {
 
         <h5 className={"mt-4"}>Wybierz pola</h5>
         <div className={"d-flex gap-2 justify-content-center flex-wrap"}>
-          {INDICATORS.map(i => (
+          {INDICATORS.map((i) => (
             <Button
               key={i}
-              variant={selectedIndicators.includes(i) ? "primary" : "outline-primary"}
+              variant={
+                selectedIndicators.includes(i) ? "primary" : "outline-primary"
+              }
               onClick={() => onIndicatorClick(i as ExportIndicator)}
             >
               {mapIndicatorName(i)}
             </Button>
           ))}
         </div>
-
+        {selectedIndicators.length === 0 && (
+          <p className="text-danger mt-3">
+            Proszę wybrać co najmniej jeden wskaźnik.
+          </p>
+        )}
         <h5 className={"mt-4"}>Wybierz wojewodztwa</h5>
         <div className={"d-flex gap-2 justify-content-center flex-wrap"}>
-          {VOIVODESHIPS.map(i => (
+          {VOIVODESHIPS.map((i) => (
             <Button
               key={i}
-              variant={selectedVoivodeships.includes(i) ? "primary" : "outline-primary"}
+              variant={
+                selectedVoivodeships.includes(i) ? "primary" : "outline-primary"
+              }
               onClick={() => onVoivodeshipClick(i as ExportVoivodeship)}
             >
               {i}
             </Button>
           ))}
         </div>
-
+        {selectedVoivodeships.length === 0 && (
+          <p className="text-danger mt-3">
+            Proszę wybrać co najmniej jedno województwo.
+          </p>
+        )}
         <h5 className={"mt-4"}>Wybierz przedział lat</h5>
         <div className="col-8 mx-auto">
           <MultiRangeSlider
@@ -158,10 +190,14 @@ export default function ExportModal(props: ExportModalProps) {
         <Button variant="outline-primary" onClick={props.onClose}>
           Anuluj
         </Button>
-        <Button variant="primary" onClick={exportData}>
-          Exportuj
-        </Button>
+        {format &&
+          selectedIndicators.length > 0 &&
+          selectedVoivodeships.length > 0 && (
+            <Button variant="primary" onClick={exportData}>
+              Exportuj
+            </Button>
+          )}
       </Modal.Footer>
     </Modal>
-  )
+  );
 }
