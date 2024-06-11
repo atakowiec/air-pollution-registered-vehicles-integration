@@ -9,7 +9,7 @@ import java.util.List;
 
 public interface VehiclesRepository extends JpaRepository<Vehicle, Integer> {
 
-    @Query(value = "SELECT v.areaCode, COUNT(v) FROM Vehicle v WHERE v.fuelType is null GROUP BY v.areaCode", nativeQuery = true)
+    @Query(value = "SELECT v.areaCode, COUNT(v) FROM Vehicle v WHERE v.fuelType is null GROUP BY v.areaCode")
     List<Object[]> countVehiclesByAreaCode();
 
     @Query(value = "SELECT * FROM vehicles WHERE fuel_type is null " +
