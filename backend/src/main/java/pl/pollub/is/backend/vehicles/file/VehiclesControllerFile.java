@@ -21,6 +21,14 @@ public class VehiclesControllerFile {
 
     @PostMapping("/import/csv")
     public ResponseEntity<String> handleFileUpload(@RequestParam("file") MultipartFile file) {
+        if(file.isEmpty()) {
+            return new ResponseEntity<>(HttpStatus.BAD_REQUEST);
+        }
+
+        if(file.getOriginalFilename() == null || !file.getOriginalFilename().endsWith(".csv")) {
+            return new ResponseEntity<>(HttpStatus.BAD_REQUEST);
+        }
+
         try {
             return vehiclesService.processCsvFile(file);
         } catch (IOException | ParseException e) {

@@ -67,6 +67,7 @@ public class AirPollutionService {
             progress.setStartDate();
             try (ReadableWorkbook wb = new ReadableWorkbook(file)) {
                 progress.setDataLoaded(true);
+                airPollutionRepository.deleteAllInBatch();
 
                 // first count rows in all sheets
                 wb.getSheets().forEach(this::preprocessSheet);
@@ -91,7 +92,7 @@ public class AirPollutionService {
             return;
 
         try (Stream<Row> rowStream = sheet.openStream()) {
-            long count = rowStream.count() - 1;
+            long count = rowStream.count() - 2;
             progress.setIndicatorTotal(sheet.getName(), count);
             progress.setTotal(progress.getTotal() + count);
         } catch (IOException e) {
@@ -103,7 +104,6 @@ public class AirPollutionService {
         if (!ALLOWED_INDICATORS.contains(sheet.getName()))
             return;
 
-        airPollutionRepository.deleteAllInBatchByIndicator(sheet.getName());
         cacheService.onDependencyChange(CacheDependency.POLLUTION_DATA);
         try (Stream<Row> rowStream = sheet.openStream()) {
             Map<String, Integer> columnIndexes = new HashMap<>();
@@ -120,6 +120,8 @@ public class AirPollutionService {
                     }
                     return;
                 }
+                // skip first two rows
+                if (row.getRowNum() == 2) return;
 
                 progress.addRead(1);
                 progress.addIndicatorRead(sheet.getName(), 1);

@@ -1,5 +1,5 @@
 import Container from "react-bootstrap/Container";
-import {ProgressBar} from "react-bootstrap";
+import {ProgressBar, Row} from "react-bootstrap";
 import {formatDate, formatDuration, formatNumber, round, translateImportStatus} from "../../../util/utils.ts";
 import useProgress, {ProgressStatus} from "../../../hooks/useProgress.ts";
 import {useMemo} from "react";
@@ -49,11 +49,6 @@ interface CalculatedData {
       saved: number;
       readTime: number;
       saveTime: number;
-      totalTime?: string;
-      readProgress?: number;
-      saveProgress?: number;
-      readApproxTime?: string;
-      saveApproxTime?: string;
     }
   }
 }
@@ -110,6 +105,8 @@ export default function PollutionImportProgressInfo() {
     }
   }, [progress?.data ?? {}])
 
+  console.log(calculatedData.indicatorsStatus)
+
   if (!progress || calculatedData.status == "NOT_STARTED") return null
   return (
     <Container className={"text-center px-0 mt-2 col-12 col-md-8 col-xl-6 col-xxl-5 gap-5 mb-5 pb-5"}>
@@ -144,6 +141,23 @@ export default function PollutionImportProgressInfo() {
           Prędkość zapisu: {calculatedData.savedPerSecond} rekordów/s
         </p>
       </Container>
+      {calculatedData.indicatorsStatus && <Container className={"bg-light rounded p-4 pb-2 mb-2"}>
+        <h4 className={"mb-4"}>Import wspołczynników</h4>
+        <Row>
+          {
+            Object.entries(calculatedData.indicatorsStatus).map(([indicator, data]) => (
+              <div style={{width: "20%"}}>
+                <h5>{indicator}</h5>
+                <ProgressBar now={data.total && data.saved ? data.saved / data.total * 100 : 0}
+                             label={`${Math.round(data.total && data.saved ? data.saved / data.total * 100 : 0)}%`}/>
+                <p className={"mt-1"}>
+                  {data.saved ? formatNumber(data.saved!) : 0}/{data.total ? formatNumber(data.total!) : 0}
+                </p>
+              </div>
+            ))
+          }
+        </Row>
+      </Container>}
     </Container>
   )
 }

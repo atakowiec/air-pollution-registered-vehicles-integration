@@ -19,7 +19,10 @@ export default function PollutionFileImport() {
   }
 
   const onFileUpload = () => {
-    if (!selectedFile) return;
+    if (!selectedFile) {
+      setStatus("Wybierz plik do przesłania")
+      return;
+    }
 
     const formData = new FormData()
     formData.append(
@@ -32,7 +35,12 @@ export default function PollutionFileImport() {
       headers: {
         "Content-Type": "multipart/form-data"
       },
-    }).catch(() => {
+    })
+      .then((res) => {
+        if(res.status == 409)
+          setStatus("Poczekać na zakończenie trwającego importu")
+      })
+      .catch(() => {
       setStatus("Wystąpił błąd podczas importu danych")
     })
   }

@@ -44,6 +44,11 @@ export default function CepikFileImport() {
         },
       })
       .then((response) => {
+        if(response.status == 409) {
+          setStatus("Poczekać na zakończenie trwającego importu")
+          return;
+        }
+
         if (response.status === 200) { // Zakładamy, że 200 oznacza sukces
           setProgress(response.data);
           setStatus("Plik został przesłany.");

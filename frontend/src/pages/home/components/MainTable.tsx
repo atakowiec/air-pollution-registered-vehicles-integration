@@ -97,8 +97,6 @@ export default function MainTable({
     setSortOrder("asc")
   }
 
-  console.log({finalData})
-
   return (
     <div className={`col-12 col-xxl-7 ${style.table}`}>
       <div className={style.scrollableTableWrapper}>

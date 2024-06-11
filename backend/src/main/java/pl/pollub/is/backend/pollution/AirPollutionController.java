@@ -1,6 +1,7 @@
 package pl.pollub.is.backend.pollution;
 
 import lombok.RequiredArgsConstructor;
+import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.RequestMapping;
@@ -16,6 +17,14 @@ public class AirPollutionController {
 
     @PostMapping("/import")
     public ResponseEntity<String> handleFileUpload(@RequestParam("file") MultipartFile file) {
+        if(file.isEmpty()) {
+            return new ResponseEntity<>(HttpStatus.BAD_REQUEST);
+        }
+
+        if(file.getOriginalFilename() == null || !file.getOriginalFilename().endsWith(".xlsx")) {
+            return new ResponseEntity<>(HttpStatus.BAD_REQUEST);
+        }
+
         return airPollutionService.handleFileUpload(file);
     }
 }
