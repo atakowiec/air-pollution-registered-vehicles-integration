@@ -48,4 +48,12 @@ public interface VehiclesRepository extends JpaRepository<Vehicle, Integer> {
 
     @Query(value = "SELECT v.areaCode, COUNT(*) FROM Vehicle v WHERE v.deregistrationDate IS NOT NULL AND v.fuelType is null GROUP BY v.areaCode")
     List<Object[]> countDeregistrationsByAreaCode();
+
+    @Query(value = "SELECT v.fuelType, COUNT(v) FROM Vehicle v WHERE v.fuelType IS NOT NULL AND v.fuelType != 'NIE DOTYCZY' GROUP BY v.fuelType")
+    List<Object[]> countVehiclesByFuelType();
+
+    @Query(value = "SELECT v.brand, COUNT(v) as count FROM Vehicle v GROUP BY v.brand ORDER BY count DESC LIMIT 10")
+    List<Object[]> findTop10MostFrequentBrands();
+
+
 }

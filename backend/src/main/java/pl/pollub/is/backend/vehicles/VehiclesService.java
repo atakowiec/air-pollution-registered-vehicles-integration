@@ -18,6 +18,8 @@ public class VehiclesService {
     private final static String REGISTRATIONS_BY_YEAR_AND_VOIVODESHIP_KEY = "REGISTRATIONS_BY_YEAR_AND_VOIVODESHIP";
     private final static String DEREGISTRATIONS_BY_YEAR_AND_VOIVODESHIP_KEY = "DEREGISTRATIONS_BY_YEAR_AND_VOIVODESHIP";
     private final static String DEREGISTRATIONS_BY_AREA_CODE_KEY = "DEREGISTRATIONS_BY_AREA_CODE";
+    private final static String FUEL_TYPES_KEY= "FUEL_TYPES";
+    private final static String TOP_BRANDS_KEY = "TOP_BRANDS";
 
     private final VehiclesRepository vehiclesRepository;
     private final DatabaseCacheService cacheService;
@@ -34,6 +36,33 @@ public class VehiclesService {
         cacheService.registerSupplier(REGISTRATIONS_BY_YEAR_AND_VOIVODESHIP_KEY, this::fetchRegistrationsByAreaCodeAndVoivodeships, CacheDependency.VEHICLES_DATA);
         cacheService.registerSupplier(DEREGISTRATIONS_BY_YEAR_AND_VOIVODESHIP_KEY, this::fetchDeregistrationsByAreaCodeAndVoivodeships, CacheDependency.VEHICLES_DATA);
         cacheService.registerSupplier(DEREGISTRATIONS_BY_AREA_CODE_KEY, this::fetchDeregistrationsByAreaCode, CacheDependency.VEHICLES_DATA);
+        cacheService.registerSupplier(FUEL_TYPES_KEY, this::fetchFuelTypes, CacheDependency.VEHICLES_DATA);
+        cacheService.registerSupplier(TOP_BRANDS_KEY, this::fetchTop10Brands, CacheDependency.VEHICLES_DATA);
+    }
+
+    private String fetchTop10Brands() {
+        List<Object[]> dbResult = vehiclesRepository.findTop10MostFrequentBrands();
+        SimpleJsonBuilder result = SimpleJsonBuilder.empty();
+
+        for (Object[] objects : dbResult) {
+            if (objects[0] != null) {
+                result.add(objects[0].toString(), objects[1]);
+            }
+        }
+
+        return result.toJson();
+    }
+
+
+    private String fetchFuelTypes() {
+        List<Object[]> dbResult = vehiclesRepository.countVehiclesByFuelType();
+        SimpleJsonBuilder result = SimpleJsonBuilder.empty();
+
+        for (Object[] objects : dbResult) {
+            result.add(objects[0].toString(), objects[1]);
+        }
+
+        return result.toJson();
     }
 
     private String fetchVehiclesCountByAreaCode() {
@@ -113,5 +142,13 @@ public class VehiclesService {
         } catch (JsonProcessingException e) {
             return "{}";
         }
+    }
+
+    public String getFuelTypes() {
+        return cacheService.getValue(FUEL_TYPES_KEY);
+    }
+
+    public Object getTop10Brands() {
+        return cacheService.getValue(TOP_BRANDS_KEY);
     }
 }

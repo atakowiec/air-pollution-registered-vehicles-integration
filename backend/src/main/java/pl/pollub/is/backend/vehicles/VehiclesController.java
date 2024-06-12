@@ -60,4 +60,18 @@ public class VehiclesController {
                 .contentType(MediaType.APPLICATION_JSON)
                 .body(vehiclesService.getDeregistrationsByAreaCode());
     }
+
+    @GetMapping("/counts/by-fuel-type")
+    public Object getVehiclesByFuelType() {
+        return ResponseEntity.ok()
+                .contentType(MediaType.APPLICATION_JSON)
+                .body(vehiclesService.getFuelTypes());
+    }
+
+    @GetMapping("/counts/top-10-brands")
+    public Object getTop10Brands() {
+        return ResponseEntity.ok()
+                .contentType(MediaType.APPLICATION_JSON)
+                .body(vehiclesService.getTop10Brands());
+    }
 }
