@@ -58,6 +58,14 @@ export default function getCumulativeData(mergedData: ApiData<MergedData>): ApiD
           result[year][voivodeship][key]! /= countsSoFar[voivodeship][key]!;
         }
       }
+
+      // copy registrations and deregistrations if they are not present in current year
+      if (!result[year][voivodeship]["registrations"]) {
+        result[year][voivodeship]["registrations"] = sumSoFar[voivodeship]["registrations"];
+      }
+      if (!result[year][voivodeship]["deregistrations"]) {
+        result[year][voivodeship]["deregistrations"] = sumSoFar[voivodeship]["deregistrations"];
+      }
     }
   }
 
