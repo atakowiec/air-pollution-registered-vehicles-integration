@@ -34,8 +34,7 @@ export default function VehiclesPieChart({ apiData }: PropsWithApiData) {
   return (
     <div className={`col-12 col-xl-6 ${style.chartContainer}`}>
       <h3 className={style.chartTitle}>
-        {" "}
-        Wyrejestrowane pojazdy na przestrzeni lat w poszczególnych województwach
+        Wyrejestrowane pojazdy w poszczególnych województwach (stan na 2019)
       </h3>
       <ResponsiveContainer width={"100%"} height={300}>
         <PieChart width={730} height={250}>

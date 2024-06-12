@@ -17,7 +17,7 @@ export default function VehiclesBarChart({apiData}: PropsWithApiData) {
   return (
     <div className={`col-12 col-xl-6 ${style.chartContainer}`}>
       <h3 className={style.chartTitle}>
-        Zarejestrowane pojazdy na przestrzeni lat w poszczególnych województwach
+        Zarejestrowane pojazdy poszczególnych województwach (stan na 2019)
       </h3>
       <ResponsiveContainer width={"100%"} height={300}>
         <BarChart data={data ?? []} className={"col-6"}>

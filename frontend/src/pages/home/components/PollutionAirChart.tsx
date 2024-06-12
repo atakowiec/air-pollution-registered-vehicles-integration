@@ -10,6 +10,7 @@ import {
 } from "recharts";
 import style from "../Home.module.scss";
 import ChartStatusOverlay, { PropsWithApiData } from "./ChartStatusOverlay.tsx";
+import {round} from "../../../util/utils.ts";
 
 export default function PollutionAirChart({ apiData }: PropsWithApiData) {
   const [selectedProvince, setSelectedProvince] = useState("dolnośląskie");
@@ -29,11 +30,10 @@ export default function PollutionAirChart({ apiData }: PropsWithApiData) {
     if (!selectedProvince || !apiData.data) return [];
     return years.map((year) => ({
       year,
-      NO2: apiData.data[year]?.[selectedProvince]?.NO2 || 0,
-      NOx: apiData.data[year]?.[selectedProvince]?.NOx || 0,
+      NO2: round(apiData.data[year]?.[selectedProvince]?.NO2 || 0),
+      NOx: round(apiData.data[year]?.[selectedProvince]?.NOx || 0),
     }));
   }, [selectedProvince, apiData.data, years]);
-  
 
   return (
     <div className={`col-12 col-xl-6 ${style.chartContainer}`}>
