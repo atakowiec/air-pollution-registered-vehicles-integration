@@ -10,6 +10,8 @@ import MainLineChart from "./components/MainLineChart.tsx";
 import VehiclesPieChart from "./components/VehiclesPieChart.tsx";
 import PollutionAirChart from "./components/PollutionAirChart.tsx";
 import PollutionRadarChart from "./components/PollutionRadarChart.tsx";
+import VehiclesFuelBarChart from "./components/VehiclesFuelBarChart.tsx";
+import VehiclesBrandsPieChart from "./components/VehiclesBrandsPieChart.tsx";
 
 
 export default function Home() {
@@ -17,6 +19,8 @@ export default function Home() {
   const vehiclesByAreaCode = useApi("/vehicles/counts/by-area-code", "get");
   const deregistereVehiclesByAreaCode= useApi("/vehicles/counts/deregistrations-by-area-code", "get");
   const airPollution= useApi("/air-pollution/counts/average-by-year-voivodeship-indicator", "get")
+  const fuelTypes= useApi("/vehicles/counts/by-fuel-type", "get");
+  const brands = useApi("/vehicles/counts/top-10-brands", "get");
 
   return (
     <>
@@ -30,6 +34,8 @@ export default function Home() {
             <PollutionAirChart apiData={airPollution} />
             <VehiclesPieChart apiData={deregistereVehiclesByAreaCode}/>
             <PollutionRadarChart apiData={airPollution}/>
+            <VehiclesFuelBarChart apiData={fuelTypes}/>
+            <VehiclesBrandsPieChart apiData={brands}/>
           </Row>
         </Container>
       </HomeDataContextProvider>
