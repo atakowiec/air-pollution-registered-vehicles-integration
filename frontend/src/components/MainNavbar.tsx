@@ -13,11 +13,12 @@ export function MainNavbar() {
   return (
     <Navbar expand="lg" className="bg-body-tertiary">
       <Container>
-        <Navbar.Brand as={NavLink} to="/">Projekt IS</Navbar.Brand>
+        <Navbar.Brand as={NavLink} to="/">Projekt</Navbar.Brand>
         <Navbar.Toggle aria-controls="basic-navbar-nav"/>
         <Navbar.Collapse id="basic-navbar-nav">
           <Nav style={{width: "100%"}}>
             <Nav.Link as={NavLink} to="/">Strona główna</Nav.Link>
+            <Nav.Link as={NavLink} to="/vehicles">Pojazdy</Nav.Link>
             <NavDropdown title="Import danych" id="basic-nav-dropdown">
               <NavDropdown.Item as={NavLink} to="/import/vehicles/api">
                 Dane CEPIK z api

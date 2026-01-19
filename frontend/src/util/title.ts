@@ -3,5 +3,5 @@
  * @param title - title of the page
  */
 export function title(title: string) {
-  document.title = `${title} - IS Project`;
+  document.title = `${title} - Project`;
 }

@@ -1,13 +1,14 @@
 package pl.pollub.is.backend.vehicles;
 
 import org.springframework.data.jpa.repository.JpaRepository;
+import org.springframework.data.jpa.repository.JpaSpecificationExecutor;
 import org.springframework.data.jpa.repository.Query;
 import org.springframework.data.repository.query.Param;
 import pl.pollub.is.backend.vehicles.model.Vehicle;
 
 import java.util.List;
 
-public interface VehiclesRepository extends JpaRepository<Vehicle, Integer> {
+public interface VehiclesRepository extends JpaRepository<Vehicle, Long>, JpaSpecificationExecutor<Vehicle> {
 
     @Query(value = "SELECT v.areaCode, COUNT(v) FROM Vehicle v WHERE v.fuelType is not null GROUP BY v.areaCode")
     List<Object[]> countVehiclesByAreaCode();

@@ -2,6 +2,9 @@ package pl.pollub.is.backend.vehicles;
 
 import com.fasterxml.jackson.core.JsonProcessingException;
 import com.fasterxml.jackson.databind.ObjectMapper;
+import org.springframework.data.domain.Page;
+import org.springframework.data.domain.Pageable;
+import org.springframework.data.jpa.domain.Specification;
 import org.springframework.stereotype.Service;
 import pl.pollub.is.backend.cache.DatabaseCacheService;
 import pl.pollub.is.backend.cache.supplier.CacheDependency;
@@ -104,13 +107,11 @@ public class VehiclesService {
     }
 
     public List<Vehicle> getVehiclesByAreaCodeAndRegistrationYear(String areaCode, int year) {
-        List<Vehicle> vehicles = vehiclesRepository.findVehiclesByAreaCodeAndRegistrationYear(areaCode, year);
-        return vehicles;
+        return vehiclesRepository.findVehiclesByAreaCodeAndRegistrationYear(areaCode, year);
     }
 
     public List<Object[]> getVehiclesCountByYear(int year) {
-        List<Object[]> result = vehiclesRepository.countVehiclesByYear(year);
-        return result;
+        return vehiclesRepository.countVehiclesByYear(year);
     }
 
     public String fetchRegistrationsByAreaCodeAndVoivodeships() {
@@ -150,5 +151,76 @@ public class VehiclesService {
 
     public Object getTop10Brands() {
         return cacheService.getValue(TOP_BRANDS_KEY);
+    }
+
+    public Page<Vehicle> getVehicles(String areaCode, String brand, String model, Integer manufactureYear, String fuelType, Pageable pageable) {
+        Specification<Vehicle> spec = Specification.where(null);
+
+        if (areaCode != null && !areaCode.isEmpty()) {
+            spec = spec.and((root, _, cb) -> cb.equal(root.get("areaCode"), areaCode));
+        }
+        if (brand != null && !brand.isEmpty()) {
+            spec = spec.and((root, _, cb) -> cb.equal(root.get("brand"), brand));
+        }
+        if (model != null && !model.isEmpty()) {
+            spec = spec.and((root, _, cb) -> cb.equal(root.get("model"), model));
+        }
+        if (manufactureYear != null) {
+            spec = spec.and((root, _, cb) -> cb.equal(root.get("manufactureYear"), manufactureYear));
+        }
+        if (fuelType != null && !fuelType.isEmpty()) {
+            spec = spec.and((root, _, cb) -> cb.equal(root.get("fuelType"), fuelType));
+        }
+
+        return vehiclesRepository.findAll(spec, pageable);
+    }
+
+    public Vehicle getVehicleById(Long id) {
+        return vehiclesRepository.findById(id).orElse(null);
+    }
+
+    public Vehicle createVehicle(Vehicle vehicle) {
+        cacheService.onDependencyChange(CacheDependency.VEHICLES_DATA);
+        return vehiclesRepository.save(vehicle);
+    }
+
+    public Vehicle updateVehicle(Long id, Vehicle vehicleDetails) {
+        Vehicle vehicle = vehiclesRepository.findById(id).orElse(null);
+        if (vehicle == null) return null;
+
+        if (vehicleDetails.getVehicleId() != null) vehicle.setVehicleId(vehicleDetails.getVehicleId());
+        if (vehicleDetails.getAreaCode() != null) vehicle.setAreaCode(vehicleDetails.getAreaCode());
+        if (vehicleDetails.getCountyCode() != null) vehicle.setCountyCode(vehicleDetails.getCountyCode());
+        if (vehicleDetails.getBrand() != null) vehicle.setBrand(vehicleDetails.getBrand());
+        if (vehicleDetails.getModel() != null) vehicle.setModel(vehicleDetails.getModel());
+        if (vehicleDetails.getType() != null) vehicle.setType(vehicleDetails.getType());
+        if (vehicleDetails.getSubType() != null) vehicle.setSubType(vehicleDetails.getSubType());
+        if (vehicleDetails.getManufactureYear() != null) vehicle.setManufactureYear(vehicleDetails.getManufactureYear());
+        if (vehicleDetails.getManufactureMethod() != null) vehicle.setManufactureMethod(vehicleDetails.getManufactureMethod());
+        if (vehicleDetails.getFirstRegistrationDate() != null) vehicle.setFirstRegistrationDate(vehicleDetails.getFirstRegistrationDate());
+        if (vehicleDetails.getEngineCapacity() != null) vehicle.setEngineCapacity(vehicleDetails.getEngineCapacity());
+        if (vehicleDetails.getEnginePower() != null) vehicle.setEnginePower(vehicleDetails.getEnginePower());
+        if (vehicleDetails.getHybridEnginePower() != null) vehicle.setHybridEnginePower(vehicleDetails.getHybridEnginePower());
+        if (vehicleDetails.getCurbWeight() != null) vehicle.setCurbWeight(vehicleDetails.getCurbWeight());
+        if (vehicleDetails.getFuelType() != null) vehicle.setFuelType(vehicleDetails.getFuelType());
+        if (vehicleDetails.getAlternativeFuelType() != null) vehicle.setAlternativeFuelType(vehicleDetails.getAlternativeFuelType());
+        if (vehicleDetails.getAlternativeFuelType2() != null) vehicle.setAlternativeFuelType2(vehicleDetails.getAlternativeFuelType2());
+        if (vehicleDetails.getAverageFuelConsumption() != null) vehicle.setAverageFuelConsumption(vehicleDetails.getAverageFuelConsumption());
+        if (vehicleDetails.getDeregistrationDate() != null) vehicle.setDeregistrationDate(vehicleDetails.getDeregistrationDate());
+        if (vehicleDetails.getVehiclesOwnerArea() != null) vehicle.setVehiclesOwnerArea(vehicleDetails.getVehiclesOwnerArea());
+        if (vehicleDetails.getFuelCo2Emission() != null) vehicle.setFuelCo2Emission(vehicleDetails.getFuelCo2Emission());
+        if (vehicleDetails.getAlternativeFuelCo2Emission() != null) vehicle.setAlternativeFuelCo2Emission(vehicleDetails.getAlternativeFuelCo2Emission());
+
+        cacheService.onDependencyChange(CacheDependency.VEHICLES_DATA);
+        return vehiclesRepository.save(vehicle);
+    }
+
+    public boolean deleteVehicle(Long id) {
+        if (vehiclesRepository.existsById(id)) {
+            vehiclesRepository.deleteById(id);
+            cacheService.onDependencyChange(CacheDependency.VEHICLES_DATA);
+            return true;
+        }
+        return false;
     }
 }

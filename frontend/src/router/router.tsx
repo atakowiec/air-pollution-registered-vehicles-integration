@@ -7,11 +7,26 @@ import CepikApiImport from "../pages/import/cepik/CepikApiImport.tsx";
 import CepikFileImport from "../pages/import/cepik/CepikFileImport.tsx";
 import PollutionFileImport from "../pages/import/pollution/PollutionFileImport.tsx";
 import Legend from "../pages/home/Legend.tsx";
+import VehiclesTable from "../pages/vehicles/VehiclesTable.tsx";
+import VehicleDetails from "../pages/vehicles/VehicleDetails.tsx";
+import AddVehicle from "../pages/vehicles/AddVehicle.tsx";
 
 const router = createBrowserRouter([
   {
     path: "/",
     element: <Home/>
+  },
+  {
+    path: "/vehicles",
+    element: <VehiclesTable />
+  },
+  {
+    path: "/vehicles/add",
+    element: <AddVehicle />
+  },
+  {
+    path: "/vehicles/:id",
+    element: <VehicleDetails />
   },
   {
     path: "/login",
